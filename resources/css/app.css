@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Prévention stricte de tout débordement horizontal global */
+html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+/* Fix de lisibilité globale pour les éléments <select> et <option> (Mode Clair & Sombre) */
+select {
+    color-scheme: light dark;
+}
+
+select option {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+}
+
+.dark select option,
+html.dark select option,
+[data-theme="dark"] select option {
+    background-color: #111827 !important;
+    color: #f9fafb !important;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════ */
+/* ADAPTATION MOBILE AVANCÉE : RÉDUCTION DE LA TAILLE DES ÉCRITS ET ESPACES */
+/* ═════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+    /* Échelle globale réduite à 13.5px sur smartphone pour une densité d'information optimale */
+    html {
+        font-size: 13.5px;
+    }
+
+    /* Amélioration du scroll tactile sur tous les tableaux */
+    .overflow-x-auto {
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+
+    /* Réduction automatique des titres sur mobile pour éviter les césures excessives */
+    h1 {
+        font-size: 1.6rem !important;
+        line-height: 1.2 !important;
+    }
+    h2 {
+        font-size: 1.35rem !important;
+        line-height: 1.25 !important;
+    }
+    h3 {
+        font-size: 1.1rem !important;
+    }
+
+    /* Réduction des paddings géants sur mobile */
+    .p-12 {
+        padding: 1.25rem !important;
+    }
+    .p-8 {
+        padding: 1rem !important;
+    }
+    .p-6 {
+        padding: 0.85rem !important;
+    }
+
+    /* Réduction des arrondis excessifs sur smartphone */
+    .rounded-\[3rem\],
+    .rounded-\[2\.5rem\],
+    .rounded-\[2rem\] {
+        border-radius: 1.25rem !important;
+    }
+
+    /* Réduction des grands chiffres de statistiques */
+    .text-4xl,
+    .text-5xl {
+        font-size: 1.85rem !important;
+    }
+    .text-3xl {
+        font-size: 1.45rem !important;
+    }
+
+    /* Boutons plus compacts sur smartphone */
+    .px-8.py-4 {
+        padding: 0.65rem 1rem !important;
+        font-size: 0.75rem !important;
+    }
+    .px-6.py-4 {
+        padding: 0.55rem 0.85rem !important;
+        font-size: 0.75rem !important;
+    }
+
+    /* Cellules de tableau plus denses */
+    table th, table td {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+        padding-top: 0.6rem !important;
+        padding-bottom: 0.6rem !important;
+    }
+}
+
+@media (min-width: 641px) and (max-width: 1023px) {
+    /* Tablettes : échelle modérée à 15px */
+    html {
+        font-size: 15px;
+    }
+    .p-12 {
+        padding: 2rem !important;
+    }
+    .p-8 {
+        padding: 1.5rem !important;
+    }
+}
