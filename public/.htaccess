@@ -9,7 +9,8 @@ Options -Indexes -MultiViews
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Force HTTPS
+    # Force HTTPS (compatible reverse-proxy / Alwaysdata)
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
     RewriteCond %{HTTPS} off
     RewriteCond %{HTTP_HOST} !^localhost [NC]
     RewriteCond %{HTTP_HOST} !^127\.0\.0\.1 [NC]
