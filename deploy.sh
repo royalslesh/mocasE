@@ -24,6 +24,8 @@ sed -i 's/SESSION_DRIVER=database/SESSION_DRIVER=file/' .env
 sed -i 's/CACHE_STORE=database/CACHE_STORE=file/' .env
 sed -i 's/QUEUE_CONNECTION=database/QUEUE_CONNECTION=sync/' .env
 sed -i 's/CLOUDINARY_CLOUD_NAME=/CLOUDINARY_CLOUD_NAME=xao97oiv/' .env
+sed -i 's/CLOUDINARY_API_KEY=/CLOUDINARY_API_KEY=162314685347553/' .env
+sed -i 's/CLOUDINARY_API_SECRET=/CLOUDINARY_API_SECRET=eNrS_MB2lK9X9vA_kSb7PJfa0HQ/' .env
 php8.3 artisan key:generate --force
 php8.3 artisan migrate --force
 php8.3 artisan storage:link || true
