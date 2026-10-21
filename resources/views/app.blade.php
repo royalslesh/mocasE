@@ -7,6 +7,21 @@
 
     <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
+    <!-- Initialisation Immédiate du Thème (Évite le flash blanc) -->
+    <script>
+        (function() {
+            try {
+                var theme = localStorage.getItem('theme');
+                var isDark = theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                if (isDark) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />

@@ -8,6 +8,27 @@ html, body {
     max-width: 100%;
 }
 
+:root {
+    --primary-color: #10b981;
+    --dark-bg: #0c120f;
+}
+
+.dark {
+    color-scheme: dark;
+    --dark-bg: #0c120f;
+}
+
+/* Fix autofill navigateur en mode sombre (évite le fond blanc avec texte blanc) */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #131b17 inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    transition: background-color 5000s ease-in-out 0s;
+    caret-color: #ffffff !important;
+}
+
 /* Fix de lisibilité globale pour les éléments <select> et <option> (Mode Clair & Sombre) */
 select {
     color-scheme: light dark;

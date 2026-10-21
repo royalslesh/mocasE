@@ -1,26 +1,26 @@
 import React from 'react';
 
 const FloatingSupplies = () => {
-    // Custom images from public folder
+    // Custom images from public folder (fichiers existants réels)
     const supplies = [
         '/1.png',
         '/2.png',
         '/3.png',
         '/4.png',
-        '/5 - Copie.png',
-        '/6 - Copie.png',
-        '/7 - Copie.png'
+        '/5.png',
+        '/6.png',
+        '/7.png'
     ];
 
-    // Generate items with negative delay to fill the screen immediately
-    const floatingItems = Array.from({ length: 30 }).map((_, i) => ({
+    // Optimisation mobile : 8 éléments légers au lieu de 30 pour éliminer la lenteur
+    const floatingItems = Array.from({ length: 8 }).map((_, i) => ({
         id: i,
-        src: supplies[Math.floor(Math.random() * supplies.length)],
-        left: `${Math.random() * 100}%`,
-        animationDuration: `${Math.random() * 25 + 20}s`,
-        animationDelay: `-${Math.random() * 30}s`, // Negative delay starts them mid-animation
-        size: `${Math.random() * 6 + 1.5}rem`, // Much more variety (from 1.5rem to 7.5rem)
-        opacity: Math.random() * 0.12 + 0.05,
+        src: supplies[i % supplies.length],
+        left: `${(i * 12.5) + Math.random() * 5}%`,
+        animationDuration: `${Math.random() * 15 + 25}s`,
+        animationDelay: `-${Math.random() * 20}s`,
+        size: `${Math.random() * 3 + 2}rem`,
+        opacity: 0.06,
         rotate: Math.random() * 360,
     }));
 
