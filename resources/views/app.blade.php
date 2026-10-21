@@ -10,9 +10,8 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="{{asset('build/assets/app-BMc_Keqd.css')}}">
-    <script src="{{asset('build/assets/app-DZJ0XN6s.js')}}"></script>
-    <!-- Scripts -->
+
+    <!-- Scripts & Styles via Vite -->
     @routes
     @viteReactRefresh
     @vite(['resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
@@ -23,8 +22,8 @@
     @inertia
     <noscript>
         <div style="padding: 20px; text-align: center; background: #fee2e2; color: #b91c1c;">
-            <strong>Erreur : JavaScript est désactivé ou n'a pas pu être chargé.</strong><br>
-            Veuillez vous assurer que <code>npm run dev</code> est en cours d'exécution dans votre terminal.
+            <strong>JavaScript est requis pour utiliser la plateforme MocasE.</strong><br>
+            Veuillez activer JavaScript dans les paramètres de votre navigateur pour continuer.
         </div>
     </noscript>
 </body>

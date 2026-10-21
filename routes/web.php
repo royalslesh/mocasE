@@ -19,7 +19,9 @@ use Inertia\Inertia;
 Route::get('/', [VisitorController::class, 'welcome'])->name('welcome');
 Route::get('/schools', [VisitorController::class, 'schools'])->name('visitor.schools');
 Route::get('/schools/{school}/details', [VisitorController::class, 'schoolDetails'])->name('visitor.schoolDetails');
-Route::post('/schools/{school}/admission', [VisitorController::class, 'submitAdmission'])->name('visitor.admission');
+Route::post('/schools/{school}/admission', [VisitorController::class, 'submitAdmission'])
+    ->middleware('throttle:10,1')
+    ->name('visitor.admission');
 
 Route::middleware(['auth', 'verified', 'school.isolate'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
