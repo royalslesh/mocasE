@@ -1,0 +1,17 @@
+import{j as e,H as r,L as a}from"./app-Cicg4pnY.js";function t(){return e.jsxs("div",{className:"relative flex min-h-screen flex-col items-center justify-center bg-gray-100 overflow-hidden",children:[e.jsx(r,{title:"Bientôt Disponible"}),e.jsx("div",{className:"absolute top-[-10%] left-[-10%] w-96 h-96 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob",style:{backgroundColor:"var(--primary-color)"}}),e.jsx("div",{className:"absolute top-[20%] right-[-10%] w-96 h-96 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000",style:{backgroundColor:"var(--primary-color)"}}),e.jsx("div",{className:"absolute bottom-[-20%] left-[20%] w-96 h-96 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000",style:{backgroundColor:"var(--primary-color)"}}),e.jsxs("div",{className:"z-10 bg-white/80 backdrop-blur-xl p-10 md:p-16 rounded-[3rem] shadow-2xl border border-white/40 max-w-2xl w-full mx-4 text-center transform transition-all hover:scale-[1.02] duration-500",children:[e.jsx("div",{className:"mb-8 flex justify-center",children:e.jsx("div",{className:"w-24 h-24 rounded-3xl flex items-center justify-center rotate-12 shadow-inner",style:{backgroundColor:"color-mix(in srgb, var(--primary-color), transparent 90%)"},children:e.jsx("svg",{className:"w-12 h-12 -rotate-12",fill:"none",stroke:"currentColor",viewBox:"0 0 24 24",style:{color:"var(--primary-color)"},children:e.jsx("path",{strokeLinecap:"round",strokeLinejoin:"round",strokeWidth:"2.5",d:"M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"})})})}),e.jsx("h1",{className:"text-4xl md:text-5xl font-black mb-4 tracking-tighter uppercase dark:text-white",style:{color:"var(--primary-color)"},children:"Bientôt Disponible"}),e.jsx("p",{className:"text-gray-500 text-lg mb-10 leading-relaxed font-medium",children:"Nous préparons en coulisses cette nouvelle fonctionnalité pour l'écosystème Mocas. Revenez très vite pour la découvrir !"}),e.jsxs("div",{className:"flex flex-col sm:flex-row gap-4 justify-center",children:[e.jsx("button",{onClick:()=>window.history.back(),className:"bg-gray-100 hover:bg-gray-200 text-gray-700 px-8 py-4 rounded-2xl font-bold uppercase tracking-widest transition-all duration-300 transform hover:-translate-y-1",children:"Retourner en arrière"}),e.jsx(a,{href:"/",className:"text-white px-8 py-4 rounded-2xl font-bold uppercase tracking-widest shadow-lg transition-all duration-300 transform hover:-translate-y-1",style:{backgroundColor:"var(--primary-color)",boxShadow:"0 10px 15px -3px var(--shadow-color)"},children:"Aller à l'accueil"})]})]}),e.jsx("style",{children:`
+                @keyframes blob {
+                    0% { transform: translate(0px, 0px) scale(1); }
+                    33% { transform: translate(30px, -50px) scale(1.1); }
+                    66% { transform: translate(-20px, 20px) scale(0.9); }
+                    100% { transform: translate(0px, 0px) scale(1); }
+                }
+                .animate-blob {
+                    animation: blob 7s infinite;
+                }
+                .animation-delay-2000 {
+                    animation-delay: 2s;
+                }
+                .animation-delay-4000 {
+                    animation-delay: 4s;
+                }
+            `})]})}export{t as default};
