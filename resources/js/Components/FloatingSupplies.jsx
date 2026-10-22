@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 const FloatingSupplies = () => {
-    // Custom images from public folder (fichiers existants réels)
     const supplies = [
         '/1.png',
         '/2.png',
@@ -11,66 +10,52 @@ const FloatingSupplies = () => {
         '/6.png',
         '/7.png'
     ];
-
-    // Optimisation mobile : 8 éléments légers au lieu de 30 pour éliminer la lenteur
-    const floatingItems = Array.from({ length: 8 }).map((_, i) => ({
+    // 12 éléments répartis harmonieusement sur tout l'écran
+    const floatingItems = useMemo(() => Array.from({ length: 12 }).map((_, i) => ({
         id: i,
         src: supplies[i % supplies.length],
-        left: `${(i * 12.5) + Math.random() * 5}%`,
-        animationDuration: `${Math.random() * 15 + 25}s`,
-        animationDelay: `-${Math.random() * 20}s`,
-        size: `${Math.random() * 3 + 2}rem`,
-        opacity: 0.06,
-        rotate: Math.random() * 360,
-    }));
-
+        left: `${(i * 8.3) + 2}%`,
+        duration: `${24 + (i % 5) * 4}s`,
+        delay: `-${(i * 3.5) % 24}s`,
+        size: `${2.5 + (i % 4) * 0.8}rem`,
+        rotate: (i * 45) % 360,
+    })), []);
     return (
-        <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden select-none" aria-hidden="true">
             <style>
                 {`
-                @keyframes floatUp {
+                @keyframes floatHarmonious {
                     0% {
-                        transform: translateY(110vh) rotate(0deg);
+                        transform: translateY(105vh) rotate(0deg);
                     }
                     100% {
-                        transform: translateY(-20vh) rotate(360deg);
-                    }
+                        transform: translateY(-15vh) rotate(360deg);
                 }
-                .floating-item {
+                .floating-supply-item {
                     position: absolute;
-                    bottom: 0px;
-                    animation: floatUp linear infinite;
-                    background-color: var(--primary-color);
-                    transition: background-color 0.5s ease;
-                }
+                    bottom: 0;
+                    animation: floatHarmonious linear infinite;
+                    will-change: transform;
                 `}
             </style>
-
             {floatingItems.map((item) => (
-                <div
+                <img
                     key={item.id}
-                    className="floating-item"
+                    src={item.src}
+                    alt=""
+                    loading="lazy"
+                    className="floating-supply-item opacity-[0.06] dark:opacity-[0.10] filter grayscale contrast-125 dark:invert dark:opacity-[0.09] transition-opacity"
                     style={{
                         left: item.left,
                         width: item.size,
                         height: item.size,
-                        opacity: item.opacity,
-                        maskImage: `url(${item.src})`,
-                        WebkitMaskImage: `url(${item.src})`,
-                        maskSize: 'contain',
-                        WebkitMaskSize: 'contain',
-                        maskRepeat: 'no-repeat',
-                        WebkitMaskRepeat: 'no-repeat',
-                        maskPosition: 'center',
-                        backgroundColor: 'var(--primary-color)',
-                        boxShadow: 'var(--theme-glow)',
-                        animationDuration: `calc(var(--theme-speed, 30s) * ${0.8 + Math.random() * 0.4})`,
-                        animationDelay: item.animationDelay,
+                        animationDuration: item.duration,
+                        animationDelay: item.delay,
+                        transform: `rotate(${item.rotate}deg)`,
                     }}
                 />
             ))}
         </div>
     );
 };
-
 export default FloatingSupplies;

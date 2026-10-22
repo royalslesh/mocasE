@@ -1,11 +1,21 @@
 import ThemeToggle from '@/Components/ThemeToggle';
+import FloatingSupplies from '@/Components/FloatingSupplies';
 import { Link, usePage } from '@inertiajs/react';
 
 export default function GuestLayout({ header, children, variant = 'wide' }) {
     const { school_name } = usePage().props;
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-[#070b09] text-gray-900 dark:text-gray-100 transition-colors duration-300 relative overflow-hidden">
+        <div className="min-h-screen bg-slate-50 dark:bg-[#070b09] text-gray-900 dark:text-gray-100 transition-colors duration-300 relative overflow-hidden flex flex-col justify-between">
+            {/* Décoration d'arrière-plan harmonieuse */}
+            <FloatingSupplies />
+            <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+                <div
+                    className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[140px] opacity-10 dark:opacity-20"
+                    style={{ backgroundColor: 'var(--primary-color)' }}
+                />
+            </div>
+
             {/* Navbar */}
             <nav className="relative z-50 bg-white/90 dark:bg-[#0c120f]/90 backdrop-blur-md border-b border-gray-200 dark:border-white/10 px-4 sm:px-6 lg:px-10 py-3 sm:py-4 lg:py-6">
                 <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">

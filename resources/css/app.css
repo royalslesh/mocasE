@@ -18,12 +18,42 @@ html, body {
     --dark-bg: #0c120f;
 }
 
+/* Lisibilité absolue des champs de saisie (Mode Clair & Mode Sombre) */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+textarea {
+    color-scheme: light;
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    border-color: #d1d5db !important;
+}
+
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="number"],
+.dark input[type="date"],
+.dark textarea {
+    color-scheme: dark !important;
+    background-color: #131c17 !important;
+    color: #f9fafb !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+    color: #9ca3af !important;
+}
+
 /* Fix autofill navigateur en mode sombre (évite le fond blanc avec texte blanc) */
 .dark input:-webkit-autofill,
 .dark input:-webkit-autofill:hover,
 .dark input:-webkit-autofill:focus,
 .dark input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 1000px #131b17 inset !important;
+    -webkit-box-shadow: 0 0 0 1000px #131c17 inset !important;
     -webkit-text-fill-color: #ffffff !important;
     transition: background-color 5000s ease-in-out 0s;
     caret-color: #ffffff !important;

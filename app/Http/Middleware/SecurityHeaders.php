@@ -34,8 +34,8 @@ class SecurityHeaders
         $response->headers->set('Content-Security-Policy',
             "default-src 'self'; " .
             "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://res.cloudinary.com; " .
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " .
-            "font-src 'self' https://fonts.gstatic.com data:; " .
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net; " .
+            "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net data:; " .
             "img-src 'self' data: blob: https://res.cloudinary.com; " .
             "connect-src 'self' https://api.cloudinary.com; " .
             "frame-ancestors 'self';"
