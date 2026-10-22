@@ -341,26 +341,39 @@
         </tr>
     </thead>
     <tbody>
-        @php $totalCoef = 0; $totalNoteCoef = 0; @endphp
-        @foreach($notes as $note)
         @php
-            if ($note['note'] !== null) {
-                $totalCoef += $note['coef'];
-                $totalNoteCoef += $note['note_coef'];
-            }
+            $totalCoef = 0;
+            $totalNoteCoef = 0;
+            $groupedNotes = collect($notes)->groupBy(function($n) {
+                return !empty($n['groupe']) ? $n['groupe'] : 'Matières Générales';
+            });
         @endphp
-        <tr class="{{ $note['critique'] ? 'critique-row' : '' }}">
-            <td>
-                {{ $note['nom'] }}
-                @if($note['critique']) <span style="color:#dc2626; font-size:7pt;">⚠</span> @endif
-            </td>
-            <td>{{ $note['coef'] }}</td>
-            <td class="note-cell {{ $note['note'] !== null ? ($note['critique'] ? 'note-fail' : 'note-ok') : '' }}">
-                {{ $note['note'] !== null ? number_format($note['note'], 2) : '—' }}
-            </td>
-            <td>{{ $note['note_coef'] !== null ? number_format($note['note_coef'], 2) : '—' }}</td>
-            <td style="font-size: 7.5pt;">{{ $note['appreciation'] ?? '—' }}</td>
-        </tr>
+        @foreach($groupedNotes as $groupeNom => $groupeList)
+            <tr style="background: {{ $lightColor }}; font-weight: bold;">
+                <td colspan="5" style="padding: 2mm 3mm; font-size: 7.5pt; color: {{ $textColor }}; text-transform: uppercase; letter-spacing: 0.5px;">
+                    ❖ {{ $groupeNom }}
+                </td>
+            </tr>
+            @foreach($groupeList as $note)
+            @php
+                if ($note['note'] !== null) {
+                    $totalCoef += $note['coef'];
+                    $totalNoteCoef += $note['note_coef'];
+                }
+            @endphp
+            <tr class="{{ $note['critique'] ? 'critique-row' : '' }}">
+                <td style="padding-left: 4mm;">
+                    {{ $note['nom'] }}
+                    @if($note['critique']) <span style="color:#dc2626; font-size:7pt;">⚠</span> @endif
+                </td>
+                <td>{{ $note['coef'] }}</td>
+                <td class="note-cell {{ $note['note'] !== null ? ($note['critique'] ? 'note-fail' : 'note-ok') : '' }}">
+                    {{ $note['note'] !== null ? number_format($note['note'], 2) : '—' }}
+                </td>
+                <td>{{ $note['note_coef'] !== null ? number_format($note['note_coef'], 2) : '—' }}</td>
+                <td style="font-size: 7.5pt;">{{ $note['appreciation'] ?? '—' }}</td>
+            </tr>
+            @endforeach
         @endforeach
     </tbody>
     <tfoot>

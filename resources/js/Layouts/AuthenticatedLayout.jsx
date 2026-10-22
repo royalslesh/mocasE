@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import ThemeToggle from '@/Components/ThemeToggle';
+import { ModernModalProvider } from '@/Components/ModernModal';
 
 export default function AuthenticatedLayout({ header, children }) {
     const { auth, school_name, theme_color, active_school_id, school_logo } = usePage().props;
@@ -159,6 +160,7 @@ export default function AuthenticatedLayout({ header, children }) {
     const bottomNavItems = getMobileBottomNav();
 
     return (
+        <ModernModalProvider>
         <div className="min-h-screen bg-transparent transition-colors duration-300 relative overflow-x-hidden">
 
             {/* ═══════════════════════════════════════════════════════════════ */}
@@ -540,5 +542,6 @@ export default function AuthenticatedLayout({ header, children }) {
                 )}
             </div>
         </div>
+        </ModernModalProvider>
     );
 }

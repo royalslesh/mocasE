@@ -24,13 +24,16 @@ class SchoolBrandingController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
+            'code' => 'nullable|string|max:50',
+            'region' => 'nullable|string|max:100',
+            'departement' => 'nullable|string|max:100',
             'city' => 'nullable|string|max:255',
             'contacts' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'logo' => 'nullable|image|max:2048',
         ]);
 
-        $data = $request->only('name', 'city', 'contacts', 'description');
+        $data = $request->only('name', 'city', 'contacts', 'description', 'code', 'region', 'departement');
 
         if ($request->hasFile('logo')) {
             // Delete old logo if exists

@@ -35,6 +35,7 @@ class SubjectController extends Controller
         $request->validate([
             'nom' => 'required|string|max:191',
             'coef_default' => 'nullable|integer|min:1',
+            'groupe' => 'nullable|string|max:100',
             'selected_classes' => 'nullable|array',
             'selected_classes.*.id' => 'required_with:selected_classes|exists:classes,id',
             'selected_classes.*.coefficient' => 'required_with:selected_classes|integer|min:1',
@@ -64,6 +65,7 @@ class SubjectController extends Controller
         $request->validate([
             'nom' => 'required|string|max:191',
             'coef_default' => 'nullable|integer|min:1',
+            'groupe' => 'nullable|string|max:100',
             'selected_classes' => 'nullable|array',
             'selected_classes.*.id' => 'required_with:selected_classes|exists:classes,id',
             'selected_classes.*.coefficient' => 'required_with:selected_classes|integer|min:1',

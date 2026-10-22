@@ -5,6 +5,7 @@ import { useState } from 'react';
 export default function Index({ auth, subjects, classes }) {
     const { data, setData, post, put, processing, errors, reset } = useForm({
         nom: '',
+        groupe: '',
         coef_default: 1,
         selected_classes: [], // Array of { id, coefficient }
     });
@@ -17,6 +18,7 @@ export default function Index({ auth, subjects, classes }) {
         setEditId(subject.id);
         setData({
             nom: subject.nom,
+            groupe: subject.groupe || '',
             coef_default: subject.coef_default || 1,
             selected_classes: (subject.classes || []).map(c => ({
                 id: c.id,
@@ -110,6 +112,18 @@ export default function Index({ auth, subjects, classes }) {
                             {errors.nom && <p className="mt-2 text-xs text-red-500 font-bold italic">{errors.nom}</p>}
                         </div>
 
+                        <div>
+                            <label className="block text-[10px] font-black text-gray-400 dark:text-emerald-500/80 uppercase tracking-widest mb-3 px-1">Groupe / Catégorie de Matière</label>
+                            <input
+                                type="text"
+                                className="w-full px-6 py-4 bg-gray-50 dark:bg-[#0a0f0d] border border-gray-100 dark:border-white/10 rounded-2xl text-gray-900 dark:text-white font-bold transition-all focus:ring-2"
+                                style={{ '--tw-ring-color': 'var(--primary-color)' }}
+                                value={data.groupe}
+                                onChange={(e) => setData('groupe', e.target.value)}
+                                placeholder="Ex: Groupe 1 (Scientifique), Littéraire, Langues..."
+                            />
+                            {errors.groupe && <p className="mt-2 text-xs text-red-500 font-bold italic">{errors.groupe}</p>}
+                        </div>
                         <div className="bg-gray-50 dark:bg-white/5 p-6 rounded-3xl space-y-4">
                             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Assigner aux Classes & Fixer Coeffs</p>
                             <div className="flex gap-4 items-end">
@@ -196,6 +210,7 @@ export default function Index({ auth, subjects, classes }) {
                                 <tr key={subject.id} className="group hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
                                     <td className="px-8 py-6">
                                         <span className="text-sm font-black text-gray-900 dark:text-white uppercase italic tracking-tight">{subject.nom}</span>
+                                        {subject.groupe && <span className="block text-[9px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">{subject.groupe}</span>}
                                     </td>
                                     <td className="px-8 py-6">
                                         <div className="flex flex-wrap gap-1.5">

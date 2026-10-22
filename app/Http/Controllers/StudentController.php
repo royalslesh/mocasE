@@ -112,13 +112,13 @@ class StudentController extends Controller
             'parent_name' => 'nullable|string|max:191',
             'adresse' => 'nullable|string|max:255',
             'statut' => 'nullable|string|in:nouveau,redoublant,ancien,exclu',
+            'MATRICULE' => ['required', 'string', 'max:50', \Illuminate\Validation\Rule::unique('eleves', 'MATRICULE')],
             'photo' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
         ]);
 
         $classe = Classe::find($validated['classe_id']);
 
-        // Générer le matricule automatiquement
-        $matricule = $this->generateMatricule($schoolId);
+        $matricule = strtoupper(trim($validated['MATRICULE']));
 
         // Gérer l'upload de la photo (Cloudinary en priorité, sinon stockage local)
         $photoPath = null;
@@ -175,6 +175,7 @@ class StudentController extends Controller
             'adresse' => 'nullable|string|max:255',
             'statut' => 'nullable|string|in:nouveau,redoublant,ancien,exclu,diplome',
             'photo' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
+            'MATRICULE' => ['required', 'string', 'max:50', \Illuminate\Validation\Rule::unique('eleves', 'MATRICULE')->ignore($student->id)],
         ]);
 
         // SÉCURITÉ STRICTE SUR L'EXCLUSION : Seul le Directeur / Proviseur peut exclure ou réintégrer un élève exclu
@@ -214,9 +215,11 @@ class StudentController extends Controller
 
         unset($validated['photo']);
 
-        // Le matricule ne change JAMAIS — on ne l'accepte plus en input
         $classe = Classe::find($validated['classe_id']);
-        $student->update(array_merge($validated, ['classe' => $classe->nom]));
+        $student->update(array_merge($validated, [
+            'classe'     => $classe->nom,
+            'MATRICULE'  => strtoupper(trim($validated['MATRICULE'])),
+        ]));
 
         return redirect()->route('students.index')->with('success', 'Informations de l\'élève mises à jour.');
     }

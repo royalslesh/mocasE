@@ -1,6 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+import { useModernModal } from '@/Components/ModernModal';
 
 export default function Index({ auth, students, classes = [] }) {
     const [showExportModal, setShowExportModal] = useState(false);

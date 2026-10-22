@@ -15,6 +15,7 @@ class Matiere extends Model
         'attribut',
         'coef',
         'categori',
+        'groupe',
         'school_id'
     ];
 

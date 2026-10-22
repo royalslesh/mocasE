@@ -4,6 +4,9 @@ import { Head, useForm } from '@inertiajs/react';
 export default function Edit({ auth, school }) {
     const { data, setData, post, processing, errors } = useForm({
         name: school.name || '',
+        code: school.code || '',
+        region: school.region || '',
+        departement: school.departement || '',
         city: school.city || '',
         contacts: school.contacts || '',
         description: school.description || '',

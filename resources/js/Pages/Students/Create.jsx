@@ -12,6 +12,7 @@ export default function Create({ auth, classes, levels, student = null }) {
     const { data, setData, post, processing, errors } = useForm({
         nom: student?.nom || '',
         prenom: student?.prenom || '',
+        MATRICULE: student?.MATRICULE || '',
         date_naissance: student?.date_naissance || '',
         lieu_naissance: student?.lieu_naissance || '',
         section: student?.section || 'F',
@@ -71,22 +72,30 @@ export default function Create({ auth, classes, levels, student = null }) {
                 <div className="bg-white dark:bg-[#111915] overflow-hidden shadow-2xl rounded-2xl sm:rounded-[2.5rem] border border-gray-100 dark:border-emerald-900/20 p-5 sm:p-10">
                     <form onSubmit={submit} className="space-y-8 sm:space-y-10" encType="multipart/form-data">
 
-                        {/* Matricule affiché en mode édition (lecture seule) */}
-                        {isEditing && student.MATRICULE && (
-                            <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-emerald-100 dark:border-emerald-900/30 flex items-center gap-4">
-                                <div className="bg-emerald-600 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl text-white shrink-0">
-                                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        {/* Matricule — saisie obligatoire en création, modifiable en édition */}
+                        <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-emerald-100 dark:border-emerald-900/30">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="bg-emerald-600 p-2 rounded-xl text-white shrink-0">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
                                     </svg>
                                 </div>
-                                <div className="min-w-0">
-                                    <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Matricule Permanent</p>
-                                    <p className="text-lg sm:text-2xl font-black text-emerald-800 dark:text-emerald-100 tracking-wider truncate">
-                                        {student.MATRICULE}
-                                    </p>
+                                <div>
+                                    <p className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">Matricule de l'Élève</p>
+                                    <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Numéro officiel unique. Ex : CM-2025-00123</p>
                                 </div>
                             </div>
-                        )}
+                            <input
+                                type="text"
+                                value={data.MATRICULE}
+                                onChange={(e) => setData('MATRICULE', e.target.value.toUpperCase())}
+                                className="w-full px-4 sm:px-6 py-3.5 sm:py-4 bg-white dark:bg-[#0a0f0d] border border-emerald-200 dark:border-emerald-900/40 rounded-2xl text-emerald-900 dark:text-emerald-50 text-sm font-black tracking-widest focus:ring-2 focus:ring-emerald-500 transition-all placeholder:text-gray-300 placeholder:font-normal uppercase"
+                                placeholder="Ex: CM-2025-00123"
+                                required
+                                maxLength={50}
+                            />
+                            {errors.MATRICULE && <p className="text-red-500 text-xs mt-2 font-bold italic uppercase tracking-tighter">{errors.MATRICULE}</p>}
+                        </div>
 
 
                         {/* Photo d'Identité Section */}

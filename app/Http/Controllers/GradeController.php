@@ -16,7 +16,7 @@ class GradeController extends Controller
 {
     public function create(Request $request)
     {
-        $user = $request->user();
+        $user = $request->user()->load('school');
         $schoolId = $user->school_id;
 
         // Charger les classes de l'école avec leurs matières (relation pivot matiere_classe) et leurs élèves
@@ -147,6 +147,28 @@ class GradeController extends Controller
             }
         }
 
+        // 2bis. Verrouillage : Une fois validée par l'enseignant, modification interdite sans accord du Censeur ou Proviseur
+        if ($user->role === 'enseignant') {
+            $alreadyValidated = Note::where('classe_id', $request->classe_id)
+                ->where('matiere_id', $request->matiere_id)
+                ->where('sequence', $sequence)
+                ->exists();
+
+            if ($alreadyValidated) {
+                $hasExtension = \App\Models\GradeExtensionRequest::where('school_id', $school->id)
+                    ->where('user_id', $user->id)
+                    ->where('classe_id', $request->classe_id)
+                    ->where('subject_id', $request->matiere_id)
+                    ->where('sequence', $sequence)
+                    ->where('status', 'approved')
+                    ->exists();
+
+                if (!$hasExtension) {
+                    return back()->with('error', "Ces notes ont déjà été validées. Toute modification ultérieure nécessite l'accord préalable du Censeur ou du Proviseur via une demande d'autorisation.");
+                }
+            }
+        }
+
         // 3. Vérification des Délais (Grading Deadlines)
         $deadline = \App\Models\GradingDeadline::where('school_id', $school->id)->where('sequence', $sequence)->first();
         if ($deadline && ($deadline->start_date || $deadline->end_date)) {
@@ -236,6 +258,26 @@ class GradeController extends Controller
 
             if (!$hasAssignment) {
                 return response()->json(['error' => "Non autorisé pour cette matière."], 403);
+            }
+
+            // Verrouillage note existante
+            $existingNote = Note::where('eleve_id', $validated['student_id'])
+                ->where('matiere_id', $validated['matiere_id'])
+                ->where('sequence', $sequence)
+                ->first();
+
+            if ($existingNote && $existingNote->note !== null) {
+                $hasExtension = \App\Models\GradeExtensionRequest::where('school_id', $school->id)
+                    ->where('user_id', $user->id)
+                    ->where('classe_id', $validated['classe_id'])
+                    ->where('subject_id', $validated['matiere_id'])
+                    ->where('sequence', $sequence)
+                    ->where('status', 'approved')
+                    ->exists();
+
+                if (!$hasExtension) {
+                    return response()->json(['error' => "Cette note a déjà été validée. Toute modification nécessite l'accord du Censeur ou du Proviseur."], 403);
+                }
             }
         }
 

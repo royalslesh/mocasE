@@ -4,6 +4,9 @@
     $schoolCity = is_array($school) ? ($school['city'] ?? '') : ($school->city ?? '');
     $schoolContacts = is_array($school) ? ($school['contacts'] ?? '') : ($school->contacts ?? '');
     $schoolYear = is_array($school) ? ($school['academic_year'] ?? '2025/2026') : ($school->academic_year ?? '2025/2026');
+    $schoolCode = is_array($school) ? ($school['code'] ?? null) : ($school->code ?? null);
+    $customRegion = is_array($school) ? ($school['region'] ?? null) : ($school->region ?? null);
+    $customDept = is_array($school) ? ($school['departement'] ?? null) : ($school->departement ?? null);
     $rawLogo = is_array($school) ? ($school['logo_path'] ?? null) : ($school->logo_path ?? null);
 
     // Détermination de la Délégation Régionale et Départementale selon la ville
@@ -13,7 +16,11 @@
     $deptFr   = "DU MFOUNDI";
     $deptEn   = "FOR MFOUNDI";
 
-    if (str_contains($cityLower, 'douala')) {
+    if (!empty($customRegion)) {
+        $regUpper = mb_strtoupper(trim($customRegion));
+        $regionFr = str_starts_with($regUpper, 'DU ') || str_starts_with($regUpper, 'DE ') || str_starts_with($regUpper, "D'") ? $regUpper : "DU " . $regUpper;
+        $regionEn = $regUpper;
+    } elseif (str_contains($cityLower, 'douala')) {
         $regionFr = "DU LITTORAL";
         $regionEn = "FOR THE LITTORAL";
         $deptFr   = "DU WOURI";
@@ -68,6 +75,12 @@
         $regionEn = "REGIONAL";
         $deptFr   = "DÉPARTEMENTALE (" . mb_strtoupper($schoolCity) . ")";
         $deptEn   = "DIVISIONAL (" . mb_strtoupper($schoolCity) . ")";
+    }
+
+    if (!empty($customDept)) {
+        $deptUpper = mb_strtoupper(trim($customDept));
+        $deptFr = str_starts_with($deptUpper, 'DU ') || str_starts_with($deptUpper, 'DE ') || str_starts_with($deptUpper, "D'") ? $deptUpper : "DU " . $deptUpper;
+        $deptEn = $deptUpper;
     }
 
     // Résolution universelle du logo en Base64 (compatible DomPDF & Navigateur)
@@ -145,6 +158,12 @@
                     <div class="m-academic-label">ANNÉE SCOLAIRE / ACADEMIC YEAR</div>
                     <div class="m-academic-val" style="color: {{ $headerTheme }};">{{ $schoolYear }}</div>
                 </div>
+                @if(!empty($schoolCode))
+                <div class="m-academic-box" style="border-color: {{ $headerTheme }}; margin-top: 3px;">
+                    <div class="m-academic-label">CODE ÉTABLISSEMENT / CODE</div>
+                    <div class="m-academic-val" style="color: {{ $headerTheme }}; font-size: 7.5pt; letter-spacing: 1px;">{{ $schoolCode }}</div>
+                </div>
+                @endif
             </td>
 
             {{-- Colonne DROITE : Anglais --}}

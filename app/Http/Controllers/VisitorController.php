@@ -76,4 +76,92 @@ class VisitorController extends Controller
             ]
         ]);
     }
+
+    /**
+     * Affichage du bulletin d'un élève pour les parents / visiteurs (accès par matricule, public).
+     */
+    public function showBulletin(string $matricule)
+    {
+        $eleve = \App\Models\Eleve::where('MATRICULE', strtoupper(trim($matricule)))
+            ->with('classe')
+            ->first();
+
+        if (!$eleve) {
+            return Inertia::render('Visitor/Bulletin', [
+                'eleve'    => null,
+                'error'    => "Aucun élève trouvé avec le matricule « " . strtoupper($matricule) . " ».",
+                'searched' => strtoupper($matricule),
+            ]);
+        }
+
+        $school = School::find($eleve->school_id);
+
+        if ($school && !$school->is_report_cards_visible) {
+            return Inertia::render('Visitor/Bulletin', [
+                'eleve'    => null,
+                'error'    => 'Les bulletins ne sont pas encore disponibles pour cet établissement.',
+                'searched' => strtoupper($matricule),
+            ]);
+        }
+
+        $sequences = \App\Models\Note::where('eleve_id', $eleve->id)
+            ->where('classe_id', $eleve->classe_id)
+            ->select('sequence')->distinct()->orderBy('sequence')->pluck('sequence');
+
+        $currentSeq = $sequences->last() ?? 1;
+
+        $classe = \App\Models\Classe::with(['matieres'])->find($eleve->classe_id);
+        $notes  = \App\Models\Note::where('eleve_id', $eleve->id)
+            ->where('sequence', $currentSeq)
+            ->get();
+
+        $matieres = $classe ? $classe->matieres()->get() : collect();
+        $notesFormatees = $matieres->map(function ($matiere) use ($notes) {
+            $note    = $notes->firstWhere('matiere_id', $matiere->id);
+            $coef    = $matiere->pivot->coefficient ?? $matiere->coef ?? 1;
+            $noteVal = $note ? floatval($note->note) : null;
+            $appreciation = null;
+            if ($noteVal !== null) {
+                if ($noteVal >= 18)      $appreciation = 'Très Bien';
+                elseif ($noteVal >= 16)  $appreciation = 'Bien';
+                elseif ($noteVal >= 14)  $appreciation = 'Assez Bien';
+                elseif ($noteVal >= 12)  $appreciation = 'Passable';
+                elseif ($noteVal >= 10)  $appreciation = 'Insuffisant';
+                else                     $appreciation = 'Très Insuffisant';
+            }
+            return [
+                'matiere_id'   => $matiere->id,
+                'nom'          => $matiere->nom,
+                'groupe'       => $matiere->groupe ?? 'Matières',
+                'coef'         => $coef,
+                'note'         => $noteVal,
+                'note_coef'    => $noteVal !== null ? round($noteVal * $coef, 2) : null,
+                'appreciation' => $appreciation,
+                'critique'     => $noteVal !== null && $noteVal < 8,
+            ];
+        });
+
+        $notesAvecVal  = $notesFormatees->filter(fn($n) => $n['note'] !== null);
+        $totalCoef     = $notesAvecVal->sum('coef');
+        $moyenneEleve  = $totalCoef > 0
+            ? round($notesAvecVal->sum('note_coef') / $totalCoef, 2)
+            : null;
+
+        $photoUrl = null;
+        if ($eleve->photo_path) {
+            $photoUrl = str_starts_with($eleve->photo_path, 'http')
+                ? $eleve->photo_path
+                : asset('storage/' . $eleve->photo_path);
+        }
+
+        return Inertia::render('Visitor/Bulletin', [
+            'eleve'        => array_merge($eleve->toArray(), ['photo_url' => $photoUrl]),
+            'school'       => $school,
+            'notes'        => $notesFormatees->values(),
+            'sequences'    => $sequences->values(),
+            'currentSeq'   => $currentSeq,
+            'moyenneEleve' => $moyenneEleve,
+            'classe'       => $classe ? ['nom' => $classe->nom, 'section' => $classe->section] : null,
+        ]);
+    }
 }

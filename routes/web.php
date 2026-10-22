@@ -22,6 +22,8 @@ Route::get('/schools/{school}/details', [VisitorController::class, 'schoolDetail
 Route::post('/schools/{school}/admission', [VisitorController::class, 'submitAdmission'])
     ->middleware('throttle:10,1')
     ->name('visitor.admission');
+// Accès bulletin par matricule (parents/visiteurs publics)
+Route::get('/bulletin/{matricule}', [VisitorController::class, 'showBulletin'])->name('visitor.bulletin');
 
 Route::middleware(['auth', 'verified', 'school.isolate'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

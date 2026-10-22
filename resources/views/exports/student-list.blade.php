@@ -5,36 +5,43 @@
     <title>Liste des Élèves — {{ $school->name }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Arial', sans-serif; font-size: 11px; color: #111; }
-        
+        body { font-family: 'Arial', sans-serif; font-size: 10px; color: #111; }
+
         .header { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 3px solid #111; }
         .header h1 { font-size: 18px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
         .header h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; margin-top: 4px; color: #444; }
         .header .meta { font-size: 10px; color: #888; margin-top: 6px; }
-        
-        .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; background: #f0f0f0; }
 
         .classe-block { margin-bottom: 32px; page-break-inside: avoid; }
-        .classe-title { font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; padding: 8px 12px; background: #111; color: #fff; margin-bottom: 0; border-radius: 4px 4px 0 0; display: flex; justify-content: space-between; align-items: center; }
-        
+        .classe-title {
+            font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;
+            padding: 7px 12px; background: #111; color: #fff; margin-bottom: 0;
+            border-radius: 4px 4px 0 0; display: flex; justify-content: space-between; align-items: center;
+        }
+
         table { width: 100%; border-collapse: collapse; }
         thead tr { background: #f5f5f5; }
-        th { padding: 7px 10px; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #555; border-bottom: 1px solid #ddd; text-align: left; }
-        td { padding: 7px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+        th {
+            padding: 6px 8px; font-size: 8px; font-weight: 900; text-transform: uppercase;
+            letter-spacing: 1px; color: #555; border-bottom: 1px solid #ddd; text-align: left;
+        }
+        td { padding: 6px 8px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; font-size: 9px; }
         tr:last-child td { border-bottom: none; }
         tr:nth-child(even) td { background: #fafafa; }
-        
-        .num { color: #bbb; font-weight: 900; font-size: 10px; }
-        .name { font-weight: 700; text-transform: uppercase; }
-        .matricule { font-size: 9px; color: #888; font-weight: 700; letter-spacing: 1px; }
-        .tag-red { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 10px; font-size: 8px; font-weight: 900; text-transform: uppercase; }
-        .tag-green { background: #dcfce7; color: #166534; padding: 1px 6px; border-radius: 10px; font-size: 8px; font-weight: 900; text-transform: uppercase; }
 
-        .footer { margin-top: 40px; display: flex; justify-content: space-between; font-size: 10px; color: #888; border-top: 1px solid #eee; padding-top: 12px; }
-        .signature-zone { margin-top: 60px; display: flex; justify-content: space-between; }
+        .num { color: #bbb; font-weight: 900; font-size: 9px; width: 24px; text-align: center; }
+        .name { font-weight: 700; text-transform: uppercase; }
+        .matricule { font-size: 8px; color: #666; font-weight: 700; letter-spacing: 0.5px; }
+        .dob { font-size: 8.5px; color: #333; }
+        .lob { font-size: 8.5px; color: #333; text-transform: uppercase; }
+        .sex { text-align: center; font-weight: 700; }
+        .emargement { border-bottom: 1px dotted #bbb !important; }
+
+        .footer { margin-top: 20px; display: flex; justify-content: space-between; font-size: 9px; color: #888; border-top: 1px solid #eee; padding-top: 10px; }
+        .signature-zone { margin-top: 50px; display: flex; justify-content: flex-end; }
         .signature-box { text-align: center; }
-        .signature-box p { font-size: 9px; font-weight: 900; text-transform: uppercase; color: #555; }
-        .signature-line { border-top: 1px solid #aaa; width: 160px; margin: 40px auto 6px; }
+        .signature-box p { font-size: 9px; font-weight: 900; text-transform: uppercase; color: #333; margin-top: 4px; }
+        .signature-line { border-top: 1px solid #888; width: 180px; margin: 36px auto 6px; }
 
         @media print {
             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -80,29 +87,25 @@
     <table>
         <thead>
             <tr>
-                <th style="width:32px;">N°</th>
-                <th>Matricule</th>
-                <th>Nom & Prénom</th>
-                <th>Sexe</th>
-                <th>Statut</th>
-                <th>Émargement</th>
+                <th style="width:24px;">N°</th>
+                <th>Nom &amp; Prénom</th>
+                <th style="width:36px;">Sexe</th>
+                <th style="width:110px;">Matricule</th>
+                <th style="width:80px;">Date de Naissance</th>
+                <th style="width:90px;">Lieu de Naissance</th>
+                <th style="width:70px;">Émargement</th>
             </tr>
         </thead>
         <tbody>
             @foreach($classe->eleves->sortBy('nom') as $i => $eleve)
             <tr>
-                <td class="num">{{ $i + 1 }}</td>
+                <td class="num">{{ $loop->iteration }}</td>
+                <td class="name">{{ strtoupper($eleve->nom) }} {{ $eleve->prenom }}</td>
+                <td class="sex">{{ $eleve->sexe ?? '—' }}</td>
                 <td class="matricule">{{ $eleve->MATRICULE ?? '—' }}</td>
-                <td class="name">{{ $eleve->nom }} {{ $eleve->prenom }}</td>
-                <td>{{ $eleve->sexe ?? '—' }}</td>
-                <td>
-                    @if($eleve->redoublant)
-                        <span class="tag-red">Redoublant</span>
-                    @else
-                        <span class="tag-green">Nouveau</span>
-                    @endif
-                </td>
-                <td style="width:120px;border-bottom:1px dotted #ccc;">&nbsp;</td>
+                <td class="dob">{{ $eleve->date_naissance ? \Carbon\Carbon::parse($eleve->date_naissance)->format('d/m/Y') : '—' }}</td>
+                <td class="lob">{{ $eleve->lieu_naissance ?? '—' }}</td>
+                <td class="emargement">&nbsp;</td>
             </tr>
             @endforeach
         </tbody>
@@ -112,10 +115,6 @@
 @endforeach
 
 <div class="signature-zone">
-    <div class="signature-box">
-        <div class="signature-line"></div>
-        <p>Le Censeur</p>
-    </div>
     <div class="signature-box">
         <div class="signature-line"></div>
         <p>Le Proviseur</p>

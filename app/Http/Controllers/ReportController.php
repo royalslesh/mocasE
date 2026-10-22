@@ -60,6 +60,7 @@ class ReportController extends Controller
                 'note_coef'    => $noteCoef,
                 'appreciation' => $appreciation,
                 'critique'     => $noteVal !== null && $noteVal < 10,
+                'groupe'       => $matiere->groupe ?? ($matiere->categori ?? 'Matières'),
                 'categori'     => $matiere->categori ?? 'Général',
             ];
         });
@@ -320,7 +321,13 @@ class ReportController extends Controller
             ->select('sequence')->distinct()->pluck('sequence')->sort()->values();
 
         return Inertia::render('Reports/Show', [
-            'student'        => $student,
+            'student'        => array_merge($student->toArray(), [
+                'photo_url' => $student->photo_path
+                    ? (str_starts_with($student->photo_path, 'http')
+                        ? $student->photo_path
+                        : asset('storage/' . $student->photo_path))
+                    : null,
+            ]),
             'seq_data'       => $seqData,
             'trim_data'      => $trimData,
             'current_seq'    => $sequence,
