@@ -63,6 +63,8 @@ class VisitorController extends Controller
             'active_school_id' => $school->id
         ]);
 
+        $teacherCount = User::where('school_id', $school->id)->where('role', 'enseignant')->count();
+
         return Inertia::render('Visitor/SchoolDetails', [
             'school' => $school,
             'levels' => $levels,
@@ -73,6 +75,7 @@ class VisitorController extends Controller
                 'success_rate' => $successRate,
                 'class_count' => Classe::where('school_id', $school->id)->count(),
                 'subject_count' => $matieres->count(),
+                'teacher_count' => $teacherCount,
             ]
         ]);
     }

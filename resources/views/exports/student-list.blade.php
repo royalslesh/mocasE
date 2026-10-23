@@ -67,7 +67,7 @@
         'nouveaux'    => 'NOUVEAUX INSCRITS UNIQUEMENT',
         default       => 'TOUS LES ÉLÈVES INSCRITS',
     };
-    $docSubtitle = "REGISTRE D'APPEL & D'ÉMARGEMENT — " . $filterLabel . " — GÉNÉRÉ LE " . now()->format('d/m/Y à H:i');
+    $docSubtitle = "LISTE NOMINATIVE OFFICIELLE — " . $filterLabel . " — GÉNÉRÉ LE " . now()->format('d/m/Y à H:i');
 @endphp
 
 @include('partials.official-header', [
@@ -87,13 +87,13 @@
     <table>
         <thead>
             <tr>
-                <th style="width:24px;">N°</th>
+                <th style="width:28px;">N°</th>
                 <th>Nom &amp; Prénom</th>
-                <th style="width:36px;">Sexe</th>
-                <th style="width:110px;">Matricule</th>
-                <th style="width:80px;">Date de Naissance</th>
-                <th style="width:90px;">Lieu de Naissance</th>
-                <th style="width:70px;">Émargement</th>
+                <th style="width:40px;">Sexe</th>
+                <th style="width:130px;">Matricule</th>
+                <th style="width:95px;">Date de Naissance</th>
+                <th style="width:120px;">Lieu de Naissance</th>
+                <th style="width:75px;">Statut</th>
             </tr>
         </thead>
         <tbody>
@@ -105,7 +105,13 @@
                 <td class="matricule">{{ $eleve->MATRICULE ?? '—' }}</td>
                 <td class="dob">{{ $eleve->date_naissance ? \Carbon\Carbon::parse($eleve->date_naissance)->format('d/m/Y') : '—' }}</td>
                 <td class="lob">{{ $eleve->lieu_naissance ?? '—' }}</td>
-                <td class="emargement">&nbsp;</td>
+                <td style="text-align:center;">
+                    @if($eleve->redoublant)
+                        <span style="color:#b91c1c;font-weight:700;font-size:7pt;">Redoublant</span>
+                    @else
+                        <span style="color:#15803d;font-weight:700;font-size:7pt;">Nouveau</span>
+                    @endif
+                </td>
             </tr>
             @endforeach
         </tbody>
