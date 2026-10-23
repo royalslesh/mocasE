@@ -40,6 +40,22 @@ class Eleve extends Model
         'is_redoublant',
     ];
 
+    protected $appends = ['photo_url'];
+
+    public function getPhotoUrlAttribute(): ?string
+    {
+        if (empty($this->photo_path)) {
+            return null;
+        }
+
+        if (str_starts_with($this->photo_path, 'http://') || str_starts_with($this->photo_path, 'https://')) {
+            return $this->photo_path;
+        }
+
+        $clean = ltrim(preg_replace('#^storage/#', '', $this->photo_path), '/');
+        return asset('storage/' . $clean);
+    }
+
     public function school()
     {
         return $this->belongsTo(School::class);

@@ -19,6 +19,33 @@
     $mainColor  = $theme['main'];
     $lightColor = $theme['light'];
     $textColor  = $theme['text'];
+
+    // Résolution robuste de la photo de l'élève
+    $studentPhotoSrc = null;
+    $rawPhoto = $student->photo_path ?? null;
+    if ($rawPhoto) {
+        if (str_starts_with($rawPhoto, 'http://') || str_starts_with($rawPhoto, 'https://')) {
+            $studentPhotoSrc = $rawPhoto;
+        } else {
+            $cleanPath = ltrim(preg_replace('#^storage/#', '', $rawPhoto), '/');
+            $candidates = [
+                storage_path('app/public/' . $cleanPath),
+                public_path('storage/' . $cleanPath),
+                public_path($cleanPath),
+            ];
+            foreach ($candidates as $filePath) {
+                if (file_exists($filePath) && is_file($filePath)) {
+                    $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+                    $mime = in_array($ext, ['jpg', 'jpeg']) ? 'image/jpeg' : 'image/' . $ext;
+                    $studentPhotoSrc = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($filePath));
+                    break;
+                }
+            }
+            if (!$studentPhotoSrc) {
+                $studentPhotoSrc = asset('storage/' . $cleanPath);
+            }
+        }
+    }
 @endphp
 <style>
     @page { margin: 10mm 12mm 10mm 12mm; size: A4 portrait; }
@@ -78,8 +105,33 @@
         border-radius: 4px;
         margin-bottom: 4mm;
     }
-    .identity-col { display: table-cell; padding: 2mm 3mm; vertical-align: top; width: 50%; }
-    .identity-col:first-child { border-right: 1px solid {{ $mainColor }}; }
+    .identity-col { display: table-cell; padding: 2mm 3mm; vertical-align: middle; }
+    .identity-col-info { width: 43%; border-right: 1px solid {{ $mainColor }}; }
+    .identity-col-academic { width: 41%; border-right: 1px solid {{ $mainColor }}; }
+    .identity-col-photo { width: 16%; text-align: center; vertical-align: middle; padding: 1.5mm; background: #fafafa; }
+    .student-photo-img {
+        width: 22mm;
+        height: 26mm;
+        object-fit: cover;
+        border-radius: 3px;
+        border: 1px solid {{ $mainColor }};
+        display: inline-block;
+    }
+    .student-photo-placeholder {
+        width: 22mm;
+        height: 26mm;
+        border-radius: 3px;
+        border: 1px dashed #cbd5e1;
+        display: inline-block;
+        line-height: 26mm;
+        font-size: 6.5pt;
+        font-weight: bold;
+        color: #94a3b8;
+        background: #f8fafc;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
     .identity-label { font-size: 7pt; color: #777; text-transform: uppercase; letter-spacing: 0.5px; }
     .identity-value { font-size: 8.5pt; font-weight: bold; color: #1a1a2e; margin-top: 0.3mm; }
 
@@ -258,7 +310,7 @@
 {{-- IDENTITÉ DE L'ÉLÈVE --}}
 {{-- ═══════════════════════════════════════════════════════════════════════ --}}
 <div class="identity-grid">
-    <div class="identity-col">
+    <div class="identity-col identity-col-info">
         <div class="identity-label">Nom et Prénom(s)</div>
         <div class="identity-value">{{ strtoupper($student->nom) }} {{ $student->prenom }}</div>
 
@@ -273,7 +325,7 @@
         </div>
     </div>
 
-    <div class="identity-col">
+    <div class="identity-col identity-col-academic">
         <div class="identity-label">Classe / Salle</div>
         <div class="identity-value">{{ $classe_info['nom'] ?? '—' }}
             @if(!empty($classe_info['section'])) &nbsp;<small style="font-weight:normal;color:#555;">({{ $classe_info['section'] }})</small> @endif
@@ -291,6 +343,14 @@
             <div class="identity-label">Professeur Principal</div>
             <div class="identity-value">{{ $prof_principal['name'] ?? 'Non assigné' }}</div>
         </div>
+    </div>
+
+    <div class="identity-col identity-col-photo">
+        @if($studentPhotoSrc)
+            <img src="{{ $studentPhotoSrc }}" alt="Photo élève" class="student-photo-img" />
+        @else
+            <div class="student-photo-placeholder">PHOTO</div>
+        @endif
     </div>
 </div>
 

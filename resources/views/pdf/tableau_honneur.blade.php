@@ -390,8 +390,25 @@
                     <tr>
                         <td class="recipient-photo-cell">
                             <div class="recipient-photo-frame">
-                                @if(!empty($st->photo_path) && file_exists(public_path('storage/' . $st->photo_path)))
-                                    <img src="{{ public_path('storage/' . $st->photo_path) }}" alt="Photo">
+                                @php
+                                    $stPhotoSrc = null;
+                                    $rawStPhoto = $st->photo_path ?? null;
+                                    if ($rawStPhoto) {
+                                        if (str_starts_with($rawStPhoto, 'http')) {
+                                            $stPhotoSrc = $rawStPhoto;
+                                        } else {
+                                            $cleanP = ltrim(preg_replace('#^storage/#', '', $rawStPhoto), '/');
+                                            $fP = storage_path('app/public/' . $cleanP);
+                                            if (file_exists($fP)) {
+                                                $ext = strtolower(pathinfo($fP, PATHINFO_EXTENSION));
+                                                $mime = in_array($ext, ['jpg', 'jpeg']) ? 'image/jpeg' : 'image/' . $ext;
+                                                $stPhotoSrc = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($fP));
+                                            }
+                                        }
+                                    }
+                                @endphp
+                                @if($stPhotoSrc)
+                                    <img src="{{ $stPhotoSrc }}" alt="Photo">
                                 @else
                                     <div class="photo-placeholder-box">Photo</div>
                                 @endif

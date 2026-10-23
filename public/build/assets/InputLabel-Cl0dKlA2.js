@@ -1,0 +1,1 @@
+import{j as a}from"./app-CPvQEH_Z.js";function o({value:t,className:e="",children:r,...s}){return a.jsx("label",{...s,className:"block text-sm font-bold text-gray-700 dark:text-white/70 uppercase tracking-widest "+e,children:t||r})}export{o as I};

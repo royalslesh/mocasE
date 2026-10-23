@@ -123,12 +123,16 @@ class StudentController extends Controller
         // Gérer l'upload de la photo (Cloudinary en priorité, sinon stockage local)
         $photoPath = null;
         if ($request->hasFile('photo')) {
-            $cloudinary = new CloudinaryService();
-            $cloudinaryUrl = $cloudinary->upload($request->file('photo'), "mocase/students/{$schoolId}");
-            if ($cloudinaryUrl) {
-                $photoPath = $cloudinaryUrl; // URL Cloudinary complète
-            } else {
-                // Fallback : stockage local (développement / si Cloudinary non configuré)
+            try {
+                $cloudinary = new CloudinaryService();
+                $cloudinaryUrl = $cloudinary->upload($request->file('photo'), "mocase/students/{$schoolId}");
+                if ($cloudinaryUrl) {
+                    $photoPath = $cloudinaryUrl;
+                } else {
+                    $photoPath = $request->file('photo')->store("photos/students/{$schoolId}", 'public');
+                }
+            } catch (\Throwable $e) {
+                \Log::error('Student photo store error: ' . $e->getMessage());
                 $photoPath = $request->file('photo')->store("photos/students/{$schoolId}", 'public');
             }
         }
@@ -199,18 +203,27 @@ class StudentController extends Controller
 
         // Gérer l'upload de la photo (Cloudinary en priorité, sinon stockage local)
         if ($request->hasFile('photo')) {
-            // Supprimer l'ancienne photo si elle existe
-            if ($student->photo_path) {
-                if (CloudinaryService::isCloudinaryUrl($student->photo_path)) {
-                    (new CloudinaryService())->destroy($student->photo_path);
-                } elseif (\Illuminate\Support\Facades\Storage::disk('public')->exists($student->photo_path)) {
-                    \Illuminate\Support\Facades\Storage::disk('public')->delete($student->photo_path);
+            try {
+                if ($student->photo_path) {
+                    if (CloudinaryService::isCloudinaryUrl($student->photo_path)) {
+                        (new CloudinaryService())->destroy($student->photo_path);
+                    } elseif (\Illuminate\Support\Facades\Storage::disk('public')->exists($student->photo_path)) {
+                        \Illuminate\Support\Facades\Storage::disk('public')->delete($student->photo_path);
+                    }
                 }
+            } catch (\Throwable $e) {
+                \Log::warning('Old photo cleanup warning: ' . $e->getMessage());
             }
-            $cloudinary = new CloudinaryService();
-            $cloudinaryUrl = $cloudinary->upload($request->file('photo'), "mocase/students/{$schoolId}");
-            $validated['photo_path'] = $cloudinaryUrl
-                ?? $request->file('photo')->store("photos/students/{$schoolId}", 'public');
+
+            try {
+                $cloudinary = new CloudinaryService();
+                $cloudinaryUrl = $cloudinary->upload($request->file('photo'), "mocase/students/{$schoolId}");
+                $validated['photo_path'] = $cloudinaryUrl
+                    ?? $request->file('photo')->store("photos/students/{$schoolId}", 'public');
+            } catch (\Throwable $e) {
+                \Log::error('Student photo update error: ' . $e->getMessage());
+                $validated['photo_path'] = $request->file('photo')->store("photos/students/{$schoolId}", 'public');
+            }
         }
 
         unset($validated['photo']);

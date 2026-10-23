@@ -493,9 +493,9 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
                                                     </span>
 
                                                     {/* Photo ou avatar */}
-                                                    {student.photo_path ? (
+                                                    {(student.photo_url || student.photo_path) ? (
                                                         <img 
-                                                            src={`/storage/${student.photo_path}`}
+                                                            src={student.photo_url || (student.photo_path?.startsWith("http") ? student.photo_path : `/storage/${student.photo_path}`)}
                                                             alt={student.nom}
                                                             className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl object-cover shrink-0 border border-gray-200 dark:border-white/10"
                                                         />
@@ -596,9 +596,9 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
                                                         <td className="px-6 py-4 text-xs font-black text-gray-400">{index + 1}</td>
                                                         <td className="px-6 py-4">
                                                             <div className="flex items-center gap-3">
-                                                                {student.photo_path ? (
+                                                                {(student.photo_url || student.photo_path) ? (
                                                                     <img 
-                                                                        src={`/storage/${student.photo_path}`}
+                                                                        src={student.photo_url || (student.photo_path?.startsWith("http") ? student.photo_path : `/storage/${student.photo_path}`)}
                                                                         alt={student.nom}
                                                                         className="w-9 h-9 rounded-xl object-cover shrink-0 border border-gray-200 dark:border-white/10"
                                                                     />

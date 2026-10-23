@@ -6,7 +6,7 @@ export default function Create({ auth, classes, levels, student = null }) {
     const isEditing = !!student;
     const fileInputRef = useRef(null);
 
-    const initialPhotoPreview = student?.photo_path ? `/storage/${student.photo_path}` : null;
+    const initialPhotoPreview = student?.photo_url || (student?.photo_path ? (student.photo_path.startsWith('http') ? student.photo_path : `/storage/${student.photo_path}`) : null);
     const [photoPreview, setPhotoPreview] = useState(initialPhotoPreview);
 
     const { data, setData, post, processing, errors } = useForm({

@@ -446,18 +446,25 @@
                 @php
                     $studentPhotoBase64 = null;
                     if (!empty($student->photo_path)) {
-                        $cleanStudentPath = preg_replace('#^storage/#', '', $student->photo_path);
-                        $photoCandidates = [
-                            storage_path('app/public/' . $cleanStudentPath),
-                            public_path('storage/' . $cleanStudentPath),
-                            public_path($cleanStudentPath),
-                        ];
-                        foreach ($photoCandidates as $pPath) {
-                            if (file_exists($pPath) && is_file($pPath)) {
-                                $ext = strtolower(pathinfo($pPath, PATHINFO_EXTENSION));
-                                $mime = in_array($ext, ['jpg', 'jpeg']) ? 'image/jpeg' : (($ext === 'png') ? 'image/png' : 'image/' . $ext);
-                                $studentPhotoBase64 = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($pPath));
-                                break;
+                        if (str_starts_with($student->photo_path, 'http')) {
+                            $studentPhotoBase64 = $student->photo_path;
+                        } else {
+                            $cleanStudentPath = preg_replace('#^storage/#', '', $student->photo_path);
+                            $photoCandidates = [
+                                storage_path('app/public/' . $cleanStudentPath),
+                                public_path('storage/' . $cleanStudentPath),
+                                public_path($cleanStudentPath),
+                            ];
+                            foreach ($photoCandidates as $pPath) {
+                                if (file_exists($pPath) && is_file($pPath)) {
+                                    $ext = strtolower(pathinfo($pPath, PATHINFO_EXTENSION));
+                                    $mime = in_array($ext, ['jpg', 'jpeg']) ? 'image/jpeg' : (($ext === 'png') ? 'image/png' : 'image/' . $ext);
+                                    $studentPhotoBase64 = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($pPath));
+                                    break;
+                                }
+                            }
+                            if (!$studentPhotoBase64) {
+                                $studentPhotoBase64 = asset('storage/' . $cleanStudentPath);
                             }
                         }
                     }

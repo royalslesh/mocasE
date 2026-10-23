@@ -23,6 +23,32 @@
     $seq2 = $trimestre * 2;
     $trimNom = ['1' => 'PREMIER', '2' => 'DEUXIÈME', '3' => 'TROISIÈME'];
     $trimLabel = $trimNom[(string)$trimestre] ?? $trimestre;
+
+    $studentPhotoSrc = null;
+    $rawPhoto = $student->photo_path ?? null;
+    if ($rawPhoto) {
+        if (str_starts_with($rawPhoto, 'http://') || str_starts_with($rawPhoto, 'https://')) {
+            $studentPhotoSrc = $rawPhoto;
+        } else {
+            $cleanPath = ltrim(preg_replace('#^storage/#', '', $rawPhoto), '/');
+            $candidates = [
+                storage_path('app/public/' . $cleanPath),
+                public_path('storage/' . $cleanPath),
+                public_path($cleanPath),
+            ];
+            foreach ($candidates as $filePath) {
+                if (file_exists($filePath) && is_file($filePath)) {
+                    $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+                    $mime = in_array($ext, ['jpg', 'jpeg']) ? 'image/jpeg' : 'image/' . $ext;
+                    $studentPhotoSrc = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($filePath));
+                    break;
+                }
+            }
+            if (!$studentPhotoSrc) {
+                $studentPhotoSrc = asset('storage/' . $cleanPath);
+            }
+        }
+    }
 @endphp
 <style>
     @page { margin: 10mm 12mm 10mm 12mm; size: A4 portrait; }
@@ -43,8 +69,12 @@
     .bulletin-title-bar { background: {{ $mainColor }}; color: white; padding: 1.5mm 4mm; text-align: center; font-size: 9.5pt; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase; }
     .badge-trim { display: inline-block; background: rgba(255,255,255,0.3); padding: 0.5mm 3mm; border-radius: 2px; font-size: 8pt; font-weight: bold; }
     .identity-grid { display: table; width: 100%; border: 1px solid {{ $mainColor }}; border-radius: 4px; margin-bottom: 3mm; }
-    .identity-col { display: table-cell; padding: 2mm 3mm; vertical-align: top; width: 50%; }
-    .identity-col:first-child { border-right: 1px solid {{ $mainColor }}; }
+    .identity-col { display: table-cell; padding: 2mm 3mm; vertical-align: middle; }
+    .identity-col-info { width: 43%; border-right: 1px solid {{ $mainColor }}; }
+    .identity-col-academic { width: 41%; border-right: 1px solid {{ $mainColor }}; }
+    .identity-col-photo { width: 16%; text-align: center; vertical-align: middle; padding: 1.5mm; background: #fafafa; }
+    .student-photo-img { width: 22mm; height: 26mm; object-fit: cover; border-radius: 3px; border: 1px solid {{ $mainColor }}; display: inline-block; }
+    .student-photo-placeholder { width: 22mm; height: 26mm; border-radius: 3px; border: 1px dashed #cbd5e1; display: inline-block; line-height: 26mm; font-size: 6.5pt; font-weight: bold; color: #94a3b8; background: #f8fafc; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; }
     .identity-label { font-size: 7pt; color: #777; text-transform: uppercase; letter-spacing: 0.5px; }
     .identity-value { font-size: 8.5pt; font-weight: bold; margin-top: 0.3mm; }
     .stats-bar { display: table; width: 100%; margin-bottom: 3mm; border-collapse: collapse; }
@@ -121,7 +151,7 @@
 
 {{-- IDENTITÉ --}}
 <div class="identity-grid">
-    <div class="identity-col">
+    <div class="identity-col identity-col-info">
         <div class="identity-label">Nom et Prénom(s)</div>
         <div class="identity-value">{{ strtoupper($student->nom) }} {{ $student->prenom }}</div>
         <div style="margin-top:1.5mm;"><div class="identity-label">Matricule</div>
@@ -129,13 +159,20 @@
         <div style="margin-top:1.5mm;"><div class="identity-label">Sexe</div>
         <div class="identity-value">{{ $student->sexe === 'M' ? 'Masculin' : ($student->sexe === 'F' ? 'Féminin' : '—') }}</div></div>
     </div>
-    <div class="identity-col">
+    <div class="identity-col identity-col-academic">
         <div class="identity-label">Classe / Salle</div>
         <div class="identity-value">{{ $classe_info['nom'] ?? '—' }} @if(!empty($classe_info['section'])) <small style="font-weight:normal;">({{ $classe_info['section'] }})</small> @endif</div>
         <div style="margin-top:1.5mm;"><div class="identity-label">Date de Naissance</div>
         <div class="identity-value">{{ $student->date_naissance ? \Carbon\Carbon::parse($student->date_naissance)->format('d/m/Y') : '—' }}@if($student->lieu_naissance) à {{ $student->lieu_naissance }}@endif</div></div>
         <div style="margin-top:1.5mm;"><div class="identity-label">Professeur Principal</div>
         <div class="identity-value">{{ $prof_principal['name'] ?? 'Non assigné' }}</div></div>
+    </div>
+    <div class="identity-col identity-col-photo">
+        @if($studentPhotoSrc)
+            <img src="{{ $studentPhotoSrc }}" alt="Photo élève" class="student-photo-img" />
+        @else
+            <div class="student-photo-placeholder">PHOTO</div>
+        @endif
     </div>
 </div>
 

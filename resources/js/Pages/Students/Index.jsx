@@ -97,9 +97,9 @@ export default function Index({ auth, students, classes = [] }) {
                                 <div key={student.id} className="p-4 space-y-3">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3 min-w-0">
-                                            {student.photo_path ? (
+                                            {(student.photo_url || student.photo_path) ? (
                                                 <img
-                                                    src={`/storage/${student.photo_path}`}
+                                                    src={student.photo_url || `/storage/${student.photo_path}`}
                                                     alt={`${student.nom} ${student.prenom}`}
                                                     className="h-12 w-12 rounded-xl object-cover border border-gray-200 dark:border-white/10 shrink-0 shadow-sm"
                                                 />
@@ -234,9 +234,9 @@ export default function Index({ auth, students, classes = [] }) {
                                             </td>
                                             <td className="px-8 py-6 whitespace-nowrap">
                                                 <div className="flex items-center">
-                                                    {student.photo_path ? (
+                                                    {(student.photo_url || student.photo_path) ? (
                                                         <img
-                                                            src={`/storage/${student.photo_path}`}
+                                                            src={student.photo_url || `/storage/${student.photo_path}`}
                                                             alt={`${student.nom} ${student.prenom}`}
                                                             className="h-10 w-10 flex-shrink-0 rounded-xl object-cover mr-4 border border-gray-200 dark:border-white/10 shadow-sm"
                                                         />
