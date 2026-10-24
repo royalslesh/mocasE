@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { usePage } from '@inertiajs/react';
 import FloatingSupplies from '@/Components/FloatingSupplies';
+import ToastContainer from '@/Components/Toast';
 
 export default function RootLayout({ children }) {
     const { theme_color } = usePage().props;
@@ -42,6 +43,8 @@ export default function RootLayout({ children }) {
             `}} />
             <FloatingSupplies />
             {children}
+            {/* Notifications Toasts Système (Succès, Échec, En cours) */}
+            <ToastContainer />
         </div>
     );
 }

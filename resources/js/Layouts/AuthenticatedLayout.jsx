@@ -9,7 +9,7 @@ export default function AuthenticatedLayout({ header, children }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
-    // Fermer le drawer mobile lors d'un redimensionnement écran
+    // Fermer le drawer mobile lors d'un redimensionnement Ã©cran
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth >= 1024) {
@@ -34,16 +34,16 @@ export default function AuthenticatedLayout({ header, children }) {
             // Group: Academique (Structure)
             const structureItems = [];
             if (['super_admin', 'proviseur', 'censeur', 'surveillant'].includes(user.role)) {
-                structureItems.push({ name: 'Élèves', href: route('students.index'), icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197' });
+                structureItems.push({ name: 'Ã‰lÃ¨ves', href: route('students.index'), icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197' });
                 if (['super_admin', 'proviseur', 'censeur'].includes(user.role)) {
                     structureItems.push({ name: 'Salles & Classes', href: route('classes.index'), icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2' });
                     structureItems.push({ name: 'Niveaux (1-7)', href: route('levels.index'), icon: 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2z' });
-                    structureItems.push({ name: 'Matières', href: route('subjects.index'), icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13' });
+                    structureItems.push({ name: 'MatiÃ¨res', href: route('subjects.index'), icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13' });
                     structureItems.push({ name: 'Exports & Listes', href: route('exports.index'), icon: 'M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z' });
                 }
             }
             if (structureItems.length > 0) {
-                groups.push({ name: 'Académique', items: structureItems });
+                groups.push({ name: 'AcadÃ©mique', items: structureItems });
             }
 
             // Group: Pedagogie (Actions)
@@ -52,7 +52,7 @@ export default function AuthenticatedLayout({ header, children }) {
                 if (user.role === 'enseignant') {
                     actionItems.push({ name: 'Saisir Notes', href: route('grades.create'), icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5' });
                 } else {
-                    actionItems.push({ name: 'Contrôle Notes', href: route('grades.create'), icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' });
+                    actionItems.push({ name: 'ContrÃ´le Notes', href: route('grades.create'), icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' });
                 }
                 actionItems.push({ name: 'Bulletins', href: route('students.index'), icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' });
             }
@@ -60,18 +60,18 @@ export default function AuthenticatedLayout({ header, children }) {
                 actionItems.push({ name: 'Discipline', href: route('discipline.index'), icon: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 17c-.77 1.333.192 3 1.732 3z' });
             }
             if (actionItems.length > 0) {
-                groups.push({ name: 'Pédagogie & Suivi', items: actionItems });
+                groups.push({ name: 'PÃ©dagogie & Suivi', items: actionItems });
             }
 
             // Group: Gestion (Admin / Finances / RH)
             const adminItems = [];
             if (['super_admin', 'proviseur'].includes(user.role)) {
                 adminItems.push({ name: 'Ressources Humaines', href: route('proviseur.staff.index'), icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7' });
-                adminItems.push({ name: 'Identité École', href: route('school.branding.edit'), icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1' });
-                adminItems.push({ name: 'Clôture & Délibérations', href: route('year.closure.index'), icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' });
+                adminItems.push({ name: 'IdentitÃ© Ã‰cole', href: route('school.branding.edit'), icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1' });
+                adminItems.push({ name: 'ClÃ´ture & DÃ©libÃ©rations', href: route('year.closure.index'), icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' });
             }
             if (['super_admin', 'proviseur', 'comptable'].includes(user.role)) {
-                adminItems.push({ name: 'Finances & Scolarité', href: route('coming.soon'), icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' });
+                adminItems.push({ name: 'Finances & ScolaritÃ©', href: route('coming.soon'), icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' });
             }
             if (adminItems.length > 0) {
                 groups.push({ name: 'Gestion & Administration', items: adminItems });
@@ -82,8 +82,8 @@ export default function AuthenticatedLayout({ header, children }) {
             groups.push({
                 name: 'Super Administration',
                 items: [
-                    { name: 'Réseau d\'Écoles', href: route('superadmin.schools.index'), icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16' },
-                    { name: 'Paramètres Système', href: route('settings.edit'), icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0' },
+                    { name: 'RÃ©seau d\'Ã‰coles', href: route('superadmin.schools.index'), icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16' },
+                    { name: 'ParamÃ¨tres SystÃ¨me', href: route('settings.edit'), icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0' },
                 ]
             });
         }
@@ -99,15 +99,15 @@ export default function AuthenticatedLayout({ header, children }) {
             proviseur: 'Proviseur',
             censeur: 'Censeur',
             enseignant: 'Enseignant',
-            surveillant: 'Surveillant Général',
-            comptable: 'Comptable / Économe',
-            etudiant: 'Élève',
+            surveillant: 'Surveillant GÃ©nÃ©ral',
+            comptable: 'Comptable / Ã‰conome',
+            etudiant: 'Ã‰lÃ¨ve',
             visiteur: 'Visiteur'
         };
         return labels[role] || 'Utilisateur';
     };
 
-    // Raccourcis pour la barre de navigation mobile inférieure (3 onglets essentiels + 1 bouton Menu)
+    // Raccourcis pour la barre de navigation mobile infÃ©rieure (3 onglets essentiels + 1 bouton Menu)
     const getMobileBottomNav = () => {
         const items = [
             {
@@ -120,7 +120,7 @@ export default function AuthenticatedLayout({ header, children }) {
 
         if (['super_admin', 'proviseur', 'censeur', 'surveillant'].includes(user.role)) {
             items.push({
-                name: 'Élèves',
+                name: 'Ã‰lÃ¨ves',
                 href: route('students.index'),
                 active: route().current('students.*'),
                 icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197'
@@ -163,9 +163,9 @@ export default function AuthenticatedLayout({ header, children }) {
         <ModernModalProvider>
         <div className="min-h-screen bg-transparent transition-colors duration-300 relative overflow-x-hidden">
 
-            {/* ═══════════════════════════════════════════════════════════════ */}
-            {/* 1. SIDEBAR DESKTOP (Affichée uniquement sur grands écrans >= lg) */}
-            {/* ═══════════════════════════════════════════════════════════════ */}
+            {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+            {/* 1. SIDEBAR DESKTOP (AffichÃ©e uniquement sur grands Ã©crans >= lg) */}
+            {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
             <aside
                 className={`hidden lg:flex fixed left-0 top-0 h-screen transition-all duration-300 z-50 flex-col bg-white dark:bg-[#0c120f] border-r border-gray-100 dark:border-white/10 ${
                     isSidebarOpen ? 'w-80' : 'w-24'
@@ -191,7 +191,7 @@ export default function AuthenticatedLayout({ header, children }) {
                             <span className="text-sm font-black tracking-tighter text-gray-900 dark:text-white uppercase truncate">
                                 {school_name || 'SLASH MOCAS'}
                             </span>
-                            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Établissement</span>
+                            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Ã‰tablissement</span>
                         </div>
                     )}
                 </div>
@@ -243,7 +243,7 @@ export default function AuthenticatedLayout({ header, children }) {
                         <Link
                             href={route('profile.edit')}
                             className="flex items-center gap-3 min-w-0 flex-1 group"
-                            title="Mon profil & Paramètres"
+                            title="Mon profil & ParamÃ¨tres"
                         >
                             <div
                                 className="w-10 h-10 rounded-full text-white flex items-center justify-center font-black text-xs shrink-0 shadow-md group-hover:scale-105 transition-transform"
@@ -272,7 +272,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                     method="post"
                                     as="button"
                                     className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 transition-all"
-                                    title="Déconnexion"
+                                    title="DÃ©connexion"
                                 >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                                 </Link>
@@ -282,9 +282,9 @@ export default function AuthenticatedLayout({ header, children }) {
                 </div>
             </aside>
 
-            {/* ═══════════════════════════════════════════════════════════════ */}
-            {/* 2. DRAWER MOBILE SLIDE-OVER (Menu latéral tactile pour téléphones) */}
-            {/* ═══════════════════════════════════════════════════════════════ */}
+            {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+            {/* 2. DRAWER MOBILE SLIDE-OVER (Menu latÃ©ral tactile pour tÃ©lÃ©phones) */}
+            {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
             {isMobileDrawerOpen && (
                 <div
                     className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm lg:hidden transition-opacity"
@@ -376,14 +376,14 @@ export default function AuthenticatedLayout({ header, children }) {
                         className="w-full py-2.5 px-4 rounded-xl bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 font-bold text-xs flex items-center justify-center gap-2"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                        Déconnexion
+                        DÃ©connexion
                     </Link>
                 </div>
             </div>
 
-            {/* ═══════════════════════════════════════════════════════════════ */}
-            {/* 3. MAIN CONTENT (Responsive avec largeur calibrée pour éviter tout débordement) */}
-            {/* ═══════════════════════════════════════════════════════════════ */}
+            {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+            {/* 3. MAIN CONTENT (Responsive avec largeur calibrÃ©e pour Ã©viter tout dÃ©bordement) */}
+            {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
             <main
                 className={`transition-all duration-300 bg-gray-50 dark:bg-[#0c120f] min-h-screen flex flex-col min-w-0 w-full ${
                     isSidebarOpen
@@ -391,7 +391,7 @@ export default function AuthenticatedLayout({ header, children }) {
                         : 'lg:ml-24 lg:w-[calc(100%-6rem)]'
                 } max-w-full`}
             >
-                {/* TOPBAR MOBILE (Écrans < lg) */}
+                {/* TOPBAR MOBILE (Ã‰crans < lg) */}
                 <header className="lg:hidden sticky top-0 bg-white/95 dark:bg-[#0c120f]/95 backdrop-blur-md border-b border-gray-100 dark:border-white/10 h-16 px-4 flex items-center justify-between z-40">
                     <div className="flex items-center gap-3 min-w-0">
                         <button
@@ -424,7 +424,7 @@ export default function AuthenticatedLayout({ header, children }) {
                     </div>
                 </header>
 
-                {/* TOPBAR DESKTOP (Écrans >= lg) */}
+                {/* TOPBAR DESKTOP (Ã‰crans >= lg) */}
                 <header className="hidden lg:flex h-20 sticky top-0 bg-white/90 dark:bg-[#0c120f]/90 backdrop-blur-md border-b border-gray-100 dark:border-white/10 items-center justify-between px-8 z-40">
                     <div className="flex items-center gap-6 min-w-0">
                         <button
@@ -447,24 +447,24 @@ export default function AuthenticatedLayout({ header, children }) {
                             >
                                 {school_name || 'Plateforme SLASH MOCAS'}
                             </span>
-                            <span className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase">Espace Sécurisé</span>
+                            <span className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase">Espace SÃ©curisÃ©</span>
                         </div>
                     </div>
                 </header>
 
-                {/* Titre de page Mobile (si présent) */}
+                {/* Titre de page Mobile (si prÃ©sent) */}
                 {header && (
                     <div className="lg:hidden px-4 pt-3.5 pb-3 border-b border-gray-100 dark:border-white/10 bg-white/80 dark:bg-[#0c120f]/80 backdrop-blur-sm text-gray-900 dark:text-white">
                         {header}
                     </div>
                 )}
 
-                {/* Zone de contenu principale (avec padding adaptatif sur mobile et marge inférieure pour la barre mobile) */}
+                {/* Zone de contenu principale (avec padding adaptatif sur mobile et marge infÃ©rieure pour la barre mobile) */}
                 <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full min-w-0 animate-in fade-in slide-in-from-bottom-2 duration-500 relative z-10 pb-28 lg:pb-12 flex-1">
                     {children}
                 </div>
 
-                {/* FOOTER AVEC CRÉDIT RAYAN NGOULA & LIEN WHATSAPP */}
+                {/* FOOTER AVEC CRÃ‰DIT RAYAN NGOULA & LIEN WHATSAPP */}
                 <footer className="mt-auto py-6 px-4 border-t border-gray-100 dark:border-white/5 text-center">
                     <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">
                         Fait par{' '}
@@ -483,9 +483,9 @@ export default function AuthenticatedLayout({ header, children }) {
                 </footer>
             </main>
 
-            {/* ═══════════════════════════════════════════════════════════════ */}
-            {/* 4. BARRE DE NAVIGATION INFÉRIEURE MOBILE (Bottom App Bar)     */}
-            {/* ═══════════════════════════════════════════════════════════════ */}
+            {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+            {/* 4. BARRE DE NAVIGATION INFÃ‰RIEURE MOBILE (Bottom App Bar)     */}
+            {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
             <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#0c120f]/95 backdrop-blur-xl border-t border-gray-200/80 dark:border-white/10 px-2 py-1.5 grid grid-cols-4 items-center shadow-[0_-4px_25px_rgba(0,0,0,0.12)] dark:shadow-[0_-4px_25px_rgba(0,0,0,0.6)] safe-area-bottom">
                 {bottomNavItems.map((item, idx) => (
                     <Link
@@ -526,21 +526,7 @@ export default function AuthenticatedLayout({ header, children }) {
                 </button>
             </div>
 
-            {/* Toasts Container */}
-            <div className="fixed top-20 right-4 sm:right-8 z-[100] flex flex-col gap-3 max-w-[90vw]">
-                {usePage().props.flash?.success && (
-                    <div className="bg-emerald-500 text-white px-6 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-right duration-500 text-xs sm:text-sm">
-                        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" /></svg>
-                        <span className="font-bold tracking-tight">{usePage().props.flash.success}</span>
-                    </div>
-                )}
-                {usePage().props.flash?.error && (
-                    <div className="bg-red-500 text-white px-6 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-right duration-500 text-xs sm:text-sm">
-                        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 17c-.77 1.333.192 3 1.732 3z" /></svg>
-                        <span className="font-bold tracking-tight">{usePage().props.flash.error}</span>
-                    </div>
-                )}
-            </div>
+
         </div>
         </ModernModalProvider>
     );

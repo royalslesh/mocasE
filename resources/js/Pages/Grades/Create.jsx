@@ -2,6 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, router } from '@inertiajs/react';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import axios from 'axios';
+import { toast } from '@/Components/Toast';
 
 export default function Create({ auth, classes = [], existingNotes = [], isSubmissionOpen = true, userRole, deadlines = [], extensions = [] }) {
     const { data, setData, post, processing } = useForm({
@@ -19,10 +20,10 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
     // Mode d'affichage : 'cards' (tactile/mobile) ou 'table' (tableau desktop)
     const [viewMode, setViewMode] = useState('cards');
 
-    // Suivi de l'état de sauvegarde par élève: { [student_id]: 'idle' | 'saving' | 'saved' | 'error' }
+    // Suivi de l'Ã©tat de sauvegarde par Ã©lÃ¨ve: { [student_id]: 'idle' | 'saving' | 'saved' | 'error' }
     const [saveStatus, setSaveStatus] = useState({});
 
-    // Références vers les champs input pour le saut automatique de focus
+    // RÃ©fÃ©rences vers les champs input pour le saut automatique de focus
     const inputRefs = useRef({});
     // Debounce timers pour la sauvegarde automatique
     const saveTimers = useRef({});
@@ -53,22 +54,22 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
         setSaveStatus({});
     };
 
-    // Vérification des délais et autorisations
+    // VÃ©rification des dÃ©lais et autorisations
     const checkAuthorization = () => {
-        if (!selectedClass || !data.matiere_id) return { isLocked: true, message: "Veuillez sélectionner une classe et une matière." };
+        if (!selectedClass || !data.matiere_id) return { isLocked: true, message: "Veuillez sÃ©lectionner une classe et une matiÃ¨re." };
         
         if (!isSubmissionOpen && !['super_admin', 'proviseur'].includes(userRole)) {
-            return { isLocked: true, message: "La saisie des notes a été fermée par la direction à l'échelle de l'établissement." };
+            return { isLocked: true, message: "La saisie des notes a Ã©tÃ© fermÃ©e par la direction Ã  l'Ã©chelle de l'Ã©tablissement." };
         }
 
         if (['super_admin', 'proviseur'].includes(userRole)) return { isLocked: false };
 
         const seqKey = `seq${data.sequence}_auth`;
         if (!selectedClass[seqKey]) {
-            return { isLocked: true, message: `Le Censeur responsable n'a pas encore ouvert les autorisations pour la Séquence ${data.sequence}.` };
+            return { isLocked: true, message: `Le Censeur responsable n'a pas encore ouvert les autorisations pour la SÃ©quence ${data.sequence}.` };
         }
 
-        // Vérification Deadline
+        // VÃ©rification Deadline
         const seqDeadline = deadlines.find(d => d.sequence === parseInt(data.sequence));
         if (seqDeadline && (seqDeadline.start_date || seqDeadline.end_date)) {
             const now = new Date();
@@ -90,10 +91,10 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
                 if (ext && ext.status === 'approved') return { isLocked: false };
                 
                 if (ext && ext.status === 'pending') {
-                    return { isLocked: true, isDeadline: true, hasPendingExt: true, message: "Le délai est expiré. Votre demande de dérogation est en attente d'approbation." };
+                    return { isLocked: true, isDeadline: true, hasPendingExt: true, message: "Le dÃ©lai est expirÃ©. Votre demande de dÃ©rogation est en attente d'approbation." };
                 }
 
-                return { isLocked: true, isDeadline: true, message: "Le délai officiel de saisie pour cette séquence est expiré." };
+                return { isLocked: true, isDeadline: true, message: "Le dÃ©lai officiel de saisie pour cette sÃ©quence est expirÃ©." };
             }
         }
 
@@ -103,7 +104,7 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
     const authStatus = checkAuthorization();
     const isLocked = authStatus.isLocked;
 
-    // Charger les notes des élèves quand classe, matière ou séquence change
+    // Charger les notes des Ã©lÃ¨ves quand classe, matiÃ¨re ou sÃ©quence change
     useEffect(() => {
         if (selectedClass && data.matiere_id && data.sequence) {
             const initialNotes = (selectedClass.eleves || []).map(student => {
@@ -122,11 +123,11 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
         }
     }, [data.classe_id, data.matiere_id, data.sequence]);
 
-    // SAUVEGARDE AUTOMATIQUE INSTANTANÉE (Par élève)
+    // SAUVEGARDE AUTOMATIQUE INSTANTANÃ‰E (Par Ã©lÃ¨ve)
     const triggerAutoSave = (studentId, rawValue) => {
         if (isLocked || !data.classe_id || !data.matiere_id) return;
 
-        // Nettoyer les caractères virgule en point
+        // Nettoyer les caractÃ¨res virgule en point
         const cleanVal = typeof rawValue === 'string' ? rawValue.replace(',', '.') : rawValue;
         const numVal = parseFloat(cleanVal);
 
@@ -152,10 +153,12 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
             .then(() => {
                 setSaveStatus(prev => ({ ...prev, [studentId]: 'saved' }));
             })
-            .catch(() => {
+            .catch((err) => {
                 setSaveStatus(prev => ({ ...prev, [studentId]: 'error' }));
+                const errMsg = err?.response?.data?.message || "Impossible d'enregistrer la note.";
+                toast.error(errMsg, { title: "Échec de sauvegarde" });
             });
-        }, 350); // 350ms debounce pour une réactivité instantanée
+        }, 350); // 350ms debounce pour une rÃ©activitÃ© instantanÃ©e
     };
 
     // Changement de note
@@ -186,7 +189,7 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
         }
     };
 
-    // Passer au champ précédent
+    // Passer au champ prÃ©cÃ©dent
     const focusPrevStudent = (currentIndex) => {
         const prevIndex = currentIndex - 1;
         const eleves = selectedClass?.eleves || [];
@@ -200,7 +203,7 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
         }
     };
 
-    // Gestion du clavier : Entrée = élève suivant, Flèche bas = suivant, Flèche haut = précédent
+    // Gestion du clavier : EntrÃ©e = Ã©lÃ¨ve suivant, FlÃ¨che bas = suivant, FlÃ¨che haut = prÃ©cÃ©dent
     const handleKeyDown = (e, index) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -214,7 +217,7 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
         }
     };
 
-    // Statistiques en temps réel
+    // Statistiques en temps rÃ©el
     const stats = useMemo(() => {
         const validScores = data.notes.map(n => parseFloat(n.score)).filter(s => !isNaN(s) && s >= 0 && s <= 20);
         const total = selectedClass?.eleves?.length || 0;
@@ -231,7 +234,10 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
     const submit = (e) => {
         e.preventDefault();
         if (isLocked) return;
-        post(route('grades.store'));
+        toast.loading("Enregistrement de l'ensemble des notes...", { id: 'bulk-grades' });
+        post(route('grades.store'), {
+            onFinish: () => toast.dismiss('bulk-grades'),
+        });
     };
 
     const submitExtensionRequest = (e) => {
@@ -302,7 +308,7 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
             <div className="max-w-7xl mx-auto space-y-5 sm:space-y-6 px-2 sm:px-4 pb-20">
                 <form onSubmit={submit} className="space-y-5 sm:space-y-6">
                     
-                    {/* Control Panel: Classe, Matière, Séquence */}
+                    {/* Control Panel: Classe, MatiÃ¨re, SÃ©quence */}
                     <div className="bg-white dark:bg-[var(--dark-bg)] rounded-2xl sm:rounded-[2rem] p-4 sm:p-8 shadow-sm border border-gray-100 dark:border-white/5 space-y-5 sm:space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                             {/* 1. CLASSE */}
@@ -327,7 +333,7 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
                             {/* 2. MATIERE */}
                             <div>
                                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">
-                                    2. Matière Évaluée
+                                    2. MatiÃ¨re Ã‰valuÃ©e
                                 </label>
                                 <select
                                     value={data.matiere_id}
@@ -336,7 +342,7 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
                                     disabled={!selectedClass}
                                 >
                                     <option value="" className="bg-white dark:bg-gray-900 text-gray-400">
-                                        {!selectedClass ? 'Choisissez d\'abord une classe...' : availableSubjects.length === 0 ? 'Aucune matière' : 'Choisir la matière...'}
+                                        {!selectedClass ? 'Choisissez d\'abord une classe...' : availableSubjects.length === 0 ? 'Aucune matiÃ¨re' : 'Choisir la matiÃ¨re...'}
                                     </option>
                                     {availableSubjects.map((s) => (
                                         <option key={s.id} value={s.id} className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-bold">
@@ -349,7 +355,7 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
                             {/* 3. SEQUENCE */}
                             <div>
                                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">
-                                    3. Séquence
+                                    3. SÃ©quence
                                 </label>
                                 <div className="grid grid-cols-6 gap-1 sm:gap-1.5">
                                     {[1, 2, 3, 4, 5, 6].map(seq => {
@@ -372,7 +378,7 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
                                                 <span className={`text-[8px] font-black uppercase tracking-tighter ${
                                                     isSelected ? 'text-white/90' : isAuth ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'
                                                 }`}>
-                                                    {isAuth ? 'Ouverte' : 'Fermée'}
+                                                    {isAuth ? 'Ouverte' : 'FermÃ©e'}
                                                 </span>
                                             </button>
                                         );
@@ -381,7 +387,7 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
                             </div>
                         </div>
 
-                        {/* Banner d'Autorisation & Sécurité */}
+                        {/* Banner d'Autorisation & SÃ©curitÃ© */}
                         {selectedClass && data.matiere_id && (
                             <div>
                                 {isLocked ? (
@@ -392,7 +398,7 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
                                             </div>
                                             <div>
                                                 <p className="text-xs font-black text-red-900 dark:text-red-200 uppercase tracking-wide">
-                                                    🔒 Saisie Verrouillée
+                                                    ðŸ”’ Saisie VerrouillÃ©e
                                                 </p>
                                                 <p className="text-[11px] font-bold text-red-700 dark:text-red-400 mt-0.5">
                                                     {authStatus.message}
@@ -405,7 +411,7 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
                                                 onClick={() => setShowExtensionModal(true)}
                                                 className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-[11px] font-black uppercase tracking-wider rounded-xl transition-all self-start sm:self-auto shrink-0"
                                             >
-                                                Demander dérogation
+                                                Demander dÃ©rogation
                                             </button>
                                         )}
                                     </div>
@@ -417,10 +423,10 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
                                             </div>
                                             <div>
                                                 <p className="text-xs font-black text-emerald-900 dark:text-emerald-100 uppercase tracking-wide">
-                                                    🔓 Saisie Ouverte &amp; Sauvegarde Automatique
+                                                    ðŸ”“ Saisie Ouverte &amp; Sauvegarde Automatique
                                                 </p>
                                                 <p className="text-[10px] sm:text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
-                                                    Chaque note saisie est enregistrée automatiquement en arrière-plan. Appuyez sur <span className="font-black">Entrée</span> pour passer à l'élève suivant.
+                                                    Chaque note saisie est enregistrÃ©e automatiquement en arriÃ¨re-plan. Appuyez sur <span className="font-black">EntrÃ©e</span> pour passer Ã  l'Ã©lÃ¨ve suivant.
                                                 </p>
                                             </div>
                                         </div>
@@ -439,17 +445,17 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
                                         Progression de Saisie :
                                     </span>
                                     <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300">
-                                        {stats.gradedCount} / {stats.total} notés ({stats.progressPercent}%)
+                                        {stats.gradedCount} / {stats.total} notÃ©s ({stats.progressPercent}%)
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-3 text-xs font-bold text-gray-500">
                                     <span>Moy : <strong className="text-gray-900 dark:text-white">{stats.classAvg}/20</strong></span>
-                                    <span>•</span>
+                                    <span>â€¢</span>
                                     <span>Max : <strong className="text-emerald-600">{stats.maxScore}</strong></span>
-                                    <span>•</span>
+                                    <span>â€¢</span>
                                     <span>Min : <strong className="text-rose-600">{stats.minScore}</strong></span>
-                                    <span>•</span>
-                                    <span>Réussite : <strong className="text-emerald-600">{stats.passRate}%</strong></span>
+                                    <span>â€¢</span>
+                                    <span>RÃ©ussite : <strong className="text-emerald-600">{stats.passRate}%</strong></span>
                                 </div>
                             </div>
 
@@ -485,9 +491,9 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
                                                         : 'border-gray-100 dark:border-white/5'
                                                 }`}
                                             >
-                                                {/* Identité Élève */}
+                                                {/* IdentitÃ© Ã‰lÃ¨ve */}
                                                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                                                    {/* Numéro séquentiel */}
+                                                    {/* NumÃ©ro sÃ©quentiel */}
                                                     <span className="w-6 text-center text-xs font-black text-gray-300 dark:text-gray-600 shrink-0">
                                                         {index + 1}
                                                     </span>
@@ -514,20 +520,20 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
                                                             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                                                                 {student.MATRICULE || 'N/A'}
                                                             </span>
-                                                            {/* Statut de sauvegarde instantané */}
+                                                            {/* Statut de sauvegarde instantanÃ© */}
                                                             {status === 'saving' && (
                                                                 <span className="inline-flex items-center gap-1 text-[9px] font-bold text-blue-500 animate-pulse">
-                                                                    ● Sauvegarde...
+                                                                    â— Sauvegarde...
                                                                 </span>
                                                             )}
                                                             {status === 'saved' && (
                                                                 <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400">
-                                                                    ✓ Enregistré
+                                                                    âœ“ EnregistrÃ©
                                                                 </span>
                                                             )}
                                                             {status === 'error' && (
                                                                 <span className="text-[9px] font-black text-rose-500">
-                                                                    ⚠ Erreur (0 à 20)
+                                                                    âš  Erreur (0 Ã  20)
                                                                 </span>
                                                             )}
                                                         </div>
@@ -563,7 +569,7 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
                                                         type="button"
                                                         onClick={() => focusNextStudent(index)}
                                                         className="w-10 h-12 sm:w-11 sm:h-14 rounded-xl sm:rounded-2xl bg-gray-100 dark:bg-white/5 hover:bg-emerald-100 dark:hover:bg-emerald-950/30 text-gray-500 hover:text-emerald-600 flex items-center justify-center transition-all active:scale-95"
-                                                        title="Élève suivant (ou appuyez sur Entrée)"
+                                                        title="Ã‰lÃ¨ve suivant (ou appuyez sur EntrÃ©e)"
                                                     >
                                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" /></svg>
                                                     </button>
@@ -578,7 +584,7 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
                                     <table className="w-full text-left border-collapse min-w-[500px]">
                                         <thead>
                                             <tr className="bg-gray-50/50 dark:bg-white/[0.02] border-b border-gray-100 dark:border-white/5">
-                                                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest w-16">N°</th>
+                                                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest w-16">NÂ°</th>
                                                 <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Matricule &amp; Candidat</th>
                                                 <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right w-44">Note (/20)</th>
                                             </tr>
@@ -616,7 +622,7 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
                                                         <td className="px-6 py-4 text-right">
                                                             <div className="inline-flex items-center gap-2">
                                                                 {status === 'saving' && <span className="text-[9px] text-blue-500 animate-pulse font-bold">Sauvegarde...</span>}
-                                                                {status === 'saved' && <span className="text-[9px] text-emerald-600 font-bold">✓</span>}
+                                                                {status === 'saved' && <span className="text-[9px] text-emerald-600 font-bold">âœ“</span>}
                                                                 <input
                                                                     ref={el => (inputRefs.current[student.id] = el)}
                                                                     type="text"
@@ -642,10 +648,10 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
                                 </div>
                             )}
 
-                            {/* BARRE D'ACTION INFÉRIEURE / SÉCURITÉ */}
+                            {/* BARRE D'ACTION INFÃ‰RIEURE / SÃ‰CURITÃ‰ */}
                             <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                                 <div className="text-xs font-semibold text-gray-400 text-center sm:text-left">
-                                    💡 <em>Toutes vos modifications sont sauvegardées en temps réel. Le bouton ci-contre permet une validation générale.</em>
+                                    ðŸ’¡ <em>Toutes vos modifications sont sauvegardÃ©es en temps rÃ©el. Le bouton ci-contre permet une validation gÃ©nÃ©rale.</em>
                                 </div>
                                 {!isLocked && (
                                     <button 
@@ -661,15 +667,15 @@ export default function Create({ auth, classes = [], existingNotes = [], isSubmi
                     )}
                 </form>
 
-                {/* Modal Dérogation */}
+                {/* Modal DÃ©rogation */}
                 {showExtensionModal && (
                     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[80] flex items-center justify-center p-4 animate-in fade-in">
                         <div className="bg-white dark:bg-[var(--dark-bg)] w-full max-w-md rounded-2xl sm:rounded-[2rem] p-6 sm:p-8 shadow-2xl border border-white/5">
                             <h3 className="font-black text-lg sm:text-xl text-gray-900 dark:text-white uppercase tracking-tight mb-2">
-                                Demander une dérogation
+                                Demander une dÃ©rogation
                             </h3>
                             <p className="text-xs text-gray-500 font-medium mb-6">
-                                Expliquez brièvement pourquoi vous n'avez pas pu saisir vos notes dans les délais officiels.
+                                Expliquez briÃ¨vement pourquoi vous n'avez pas pu saisir vos notes dans les dÃ©lais officiels.
                             </p>
                             
                             <form onSubmit={submitExtensionRequest}>
