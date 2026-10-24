@@ -31,7 +31,10 @@ class VisitorController extends Controller
     public function schools()
     {
         return Inertia::render('Visitor/Schools', [
-            'schools' => School::where('is_active', true)->get()
+            'schools' => School::where('is_active', true)
+                ->withCount(['classes', 'eleves'])
+                ->orderBy('name')
+                ->get()
         ]);
     }
 

@@ -2,68 +2,71 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class School extends Model
 {
-    use \Illuminate\Database\Eloquent\Factories\HasFactory;
+    use HasFactory;
 
     protected $fillable = [
         'name',
         'motto',
         'is_active',
+        'academic_year',
+        'code',
+        'passing_grade',
+        'repeat_grade',
+        'enrollments_open',
         'sections_config',
         'proviseur_id',
         'adjoint_id',
         'theme_color',
         'city',
+        'region',
+        'departement',
         'contacts',
         'description',
         'video_url',
         'logo_path',
         'cover_image_path',
         'gallery_images',
-        'code',
-        'region',
-        'departement',
         'super_admin_consent',
-        'academic_year',
-        'passing_grade',
-        'repeat_grade',
-        'enrollments_open',
         'is_grades_submission_open',
         'is_report_cards_visible',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'enrollments_open' => 'boolean',
         'sections_config' => 'array',
-        'super_admin_consent' => 'boolean',
         'gallery_images' => 'array',
+        'super_admin_consent' => 'boolean',
+        'is_grades_submission_open' => 'boolean',
+        'is_report_cards_visible' => 'boolean',
     ];
 
-    protected $appends = ['logo_url', 'cover_image_url'];
+    protected $appends = [
+        'logo_url',
+        'cover_image_url',
+    ];
 
     public function getLogoUrlAttribute(): ?string
     {
-        if (!$this->logo_path) {
-            return null;
-        }
+        if (!$this->logo_path) return null;
         if (str_starts_with($this->logo_path, 'http')) {
             return $this->logo_path;
         }
-        return asset('storage/' . ltrim($this->logo_path, '/'));
+        return asset('storage/' . $this->logo_path);
     }
 
     public function getCoverImageUrlAttribute(): ?string
     {
-        if (!$this->cover_image_path) {
-            return null;
-        }
+        if (!$this->cover_image_path) return null;
         if (str_starts_with($this->cover_image_path, 'http')) {
             return $this->cover_image_path;
         }
-        return asset('storage/' . ltrim($this->cover_image_path, '/'));
+        return asset('storage/' . $this->cover_image_path);
     }
 
     public function users()
@@ -84,6 +87,16 @@ class School extends Model
     public function classes()
     {
         return $this->hasMany(Classe::class);
+    }
+
+    public function eleves()
+    {
+        return $this->hasMany(Eleve::class);
+    }
+
+    public function matieres()
+    {
+        return $this->hasMany(Matiere::class);
     }
 
     public function histories()
