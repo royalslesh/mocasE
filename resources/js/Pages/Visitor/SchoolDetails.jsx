@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { useState } from 'react';
@@ -12,6 +12,9 @@ export default function SchoolDetails({ school, stats, levels = [], matieres = [
 
     // Lightbox modal state for gallery
     const [activeImageIndex, setActiveImageIndex] = useState(null);
+
+    // Modal state for selected class details
+    const [selectedClass, setSelectedClass] = useState(null);
 
     const handleSearchBulletin = (e) => {
         e.preventDefault();
@@ -28,7 +31,6 @@ export default function SchoolDetails({ school, stats, levels = [], matieres = [
     const getVideoEmbed = (url) => {
         if (!url) return null;
         try {
-            // YouTube
             const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/);
             if (ytMatch && ytMatch[1]) {
                 return {
@@ -36,7 +38,6 @@ export default function SchoolDetails({ school, stats, levels = [], matieres = [
                     src: `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=0&rel=0`
                 };
             }
-            // Vimeo
             const vimeoMatch = url.match(/vimeo\.com\/(?:video\/)?([0-9]+)/);
             if (vimeoMatch && vimeoMatch[1]) {
                 return {
@@ -44,14 +45,12 @@ export default function SchoolDetails({ school, stats, levels = [], matieres = [
                     src: `https://player.vimeo.com/video/${vimeoMatch[1]}`
                 };
             }
-            // Direct MP4 or Cloudinary video
             if (url.match(/\.(mp4|webm|ogg)($|\?)/i) || url.includes('/video/upload/')) {
                 return {
                     type: 'video',
                     src: url
                 };
             }
-            // Fallback iframe
             return {
                 type: 'iframe',
                 src: url
@@ -80,13 +79,12 @@ export default function SchoolDetails({ school, stats, levels = [], matieres = [
                 </div>
             }
         >
-            <Head title={`${school.name} — Présentation & Bulletins`} />
+            <Head title={`${school.name} — Présentation & Vie Scolaire`} />
 
             <div className="space-y-10 sm:space-y-12 max-w-[100rem] mx-auto py-4 sm:py-8 px-3 sm:px-6">
 
                 {/* ── HERO BANNER SECTION ─────────────────────────────────────────── */}
                 <div className="rounded-3xl sm:rounded-[3rem] text-white shadow-2xl relative overflow-hidden border border-white/10">
-                    {/* Background Cover Image / Gradient */}
                     {coverUrl ? (
                         <div className="absolute inset-0">
                             <img src={coverUrl} alt="Bannière école" className="w-full h-full object-cover scale-105 filter brightness-[0.38] contrast-105" />
@@ -396,7 +394,6 @@ export default function SchoolDetails({ school, stats, levels = [], matieres = [
                                 className="max-w-full max-h-[85vh] rounded-2xl object-contain shadow-2xl border border-white/10"
                             />
 
-                            {/* Nav buttons */}
                             {gallery.length > 1 && (
                                 <div className="absolute inset-y-0 -inset-x-12 sm:-inset-x-16 flex items-center justify-between pointer-events-none">
                                     <button
@@ -421,17 +418,18 @@ export default function SchoolDetails({ school, stats, levels = [], matieres = [
                     </div>
                 )}
 
-                {/* ── STRUCTURE ACADÉMIQUE & MATIÈRES ─────────────────────────────── */}
+                {/* ── STRUCTURE ACADÉMIQUE & CLASSES CLIQUABLES ────────────────────── */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-                    {/* Left Column: Levels and Classes */}
+                    {/* Left Column: Levels and Clickable Classes */}
                     <div className="lg:col-span-2 space-y-6 sm:space-y-8">
                         <div className="bg-white dark:bg-[var(--dark-bg)] rounded-3xl sm:rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm overflow-hidden">
                             <div className="p-6 sm:p-8 border-b border-gray-100 dark:border-white/5 flex justify-between items-center">
                                 <div>
-                                    <span className="text-[10px] font-black uppercase tracking-wider text-gray-400">Organisation</span>
+                                    <span className="text-[10px] font-black uppercase tracking-wider text-gray-400">Vie Scolaire</span>
                                     <h3 className="text-lg sm:text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
                                         Cycles, Niveaux &amp; Classes
                                     </h3>
+                                    <p className="text-xs text-gray-400 mt-0.5">Cliquez sur une classe pour consulter sa fiche (professeur principal, meilleurs élèves, matières).</p>
                                 </div>
                                 <span className="px-4 py-1.5 rounded-full text-xs font-black uppercase" style={{ backgroundColor: 'color-mix(in srgb, var(--primary-color), transparent 90%)', color: 'var(--primary-color)' }}>
                                     {stats.class_count} Classes
@@ -454,14 +452,24 @@ export default function SchoolDetails({ school, stats, levels = [], matieres = [
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
                                             {level.classes.map(classe => (
-                                                <div key={classe.id} className="bg-gray-50 dark:bg-white/5 p-4 rounded-2xl flex justify-between items-center border border-gray-100 dark:border-white/5 hover:border-[var(--primary-color)] transition-colors">
-                                                    <div>
-                                                        <p className="text-xs sm:text-sm font-black text-gray-900 dark:text-white uppercase">{classe.nom}</p>
-                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">{classe.eleves_count} Élève(s)</p>
+                                                <div
+                                                    key={classe.id}
+                                                    onClick={() => setSelectedClass(classe)}
+                                                    className="bg-gray-50 dark:bg-white/5 p-4 rounded-2xl flex justify-between items-center border border-gray-100 dark:border-white/5 hover:border-[var(--primary-color)] hover:shadow-md cursor-pointer group transition-all"
+                                                >
+                                                    <div className="min-w-0 pr-2">
+                                                        <div className="flex items-center gap-1.5">
+                                                            <p className="text-xs sm:text-sm font-black text-gray-900 dark:text-white uppercase group-hover:text-[var(--primary-color)] transition-colors truncate">
+                                                                {classe.nom}
+                                                            </p>
+                                                        </div>
+                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">
+                                                            {classe.eleves_count} Élève(s)
+                                                        </p>
                                                     </div>
-                                                    <span className="w-8 h-8 rounded-xl bg-white dark:bg-black/30 flex items-center justify-center font-black text-xs text-gray-700 dark:text-gray-300 shadow-sm">
-                                                        {classe.section ? classe.section.toUpperCase() : 'F'}
-                                                    </span>
+                                                    <div className="w-8 h-8 rounded-xl bg-white dark:bg-black/30 group-hover:bg-[var(--primary-color)] group-hover:text-white flex items-center justify-center font-black text-xs text-gray-700 dark:text-gray-300 shadow-sm transition-all shrink-0">
+                                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7"/></svg>
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
@@ -475,24 +483,24 @@ export default function SchoolDetails({ school, stats, levels = [], matieres = [
                         </div>
                     </div>
 
-                    {/* Right Column: Subjects */}
+                    {/* Right Column: Subjects (NO COEFFICIENTS, just clean chips!) */}
                     <div className="space-y-6 sm:space-y-8">
                         <div className="bg-white dark:bg-[var(--dark-bg)] p-6 sm:p-8 rounded-3xl sm:rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-sm">
-                            <span className="text-[10px] font-black uppercase tracking-wider text-gray-400">Programme</span>
-                            <h3 className="text-lg sm:text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight mb-6">
-                                Matières &amp; Coefficients
+                            <span className="text-[10px] font-black uppercase tracking-wider text-gray-400">Programme Pédagogique</span>
+                            <h3 className="text-lg sm:text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight mb-2">
+                                Matières Enseignées
                             </h3>
-                            <div className="space-y-3 max-h-[50vh] overflow-y-auto custom-scrollbar pr-2">
+                            <p className="text-xs text-gray-400 mb-6">Enseignements fondamentaux et d'éveil dispensés au sein de l'établissement.</p>
+
+                            <div className="flex flex-wrap gap-2.5 max-h-[50vh] overflow-y-auto custom-scrollbar pr-2">
                                 {matieres.length > 0 ? matieres.map((subject) => (
-                                    <div key={subject.id} className="flex items-center justify-between p-3.5 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5">
-                                        <div className="min-w-0 pr-3">
-                                            <p className="text-xs sm:text-sm font-black text-gray-900 dark:text-white uppercase truncate">{subject.nom}</p>
-                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">
-                                                {subject.groupe || 'Enseignement Général'}
-                                            </p>
-                                        </div>
-                                        <span className="px-3 py-1 rounded-xl text-xs font-black bg-white dark:bg-black/30 text-[var(--primary-color)] shadow-sm shrink-0">
-                                            Coef {subject.coef}
+                                    <div
+                                        key={subject.id}
+                                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 hover:border-[var(--primary-color)] transition-colors shadow-2xs"
+                                    >
+                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--primary-color)' }} />
+                                        <span className="text-xs font-extrabold uppercase text-gray-800 dark:text-gray-200">
+                                            {subject.nom}
                                         </span>
                                     </div>
                                 )) : (
@@ -502,6 +510,112 @@ export default function SchoolDetails({ school, stats, levels = [], matieres = [
                         </div>
                     </div>
                 </div>
+
+                {/* ── MODAL FICHE PUBLIQUE DE LA CLASSE CLIQUÉE ───────────────────── */}
+                {selectedClass && (
+                    <div
+                        className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+                        onClick={() => setSelectedClass(null)}
+                    >
+                        <div
+                            className="bg-white dark:bg-[#111614] rounded-3xl sm:rounded-[2.5rem] border border-gray-100 dark:border-white/10 shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
+                            onClick={e => e.stopPropagation()}
+                        >
+                            {/* Modal Header */}
+                            <div className="p-6 sm:p-8 border-b border-gray-100 dark:border-white/5 flex items-center justify-between bg-gradient-to-r from-gray-50 to-white dark:from-white/5 dark:to-transparent">
+                                <div>
+                                    <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--primary-color)' }}>
+                                        Fiche Publique de la Classe
+                                    </span>
+                                    <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight mt-0.5">
+                                        {selectedClass.nom} {selectedClass.section ? `(${selectedClass.section.toUpperCase()})` : ''}
+                                    </h3>
+                                </div>
+                                <button
+                                    onClick={() => setSelectedClass(null)}
+                                    className="p-2.5 rounded-2xl bg-gray-100 dark:bg-white/10 hover:bg-gray-200 text-gray-600 dark:text-white transition-all"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+
+                            {/* Modal Content Scrollable */}
+                            <div className="p-6 sm:p-8 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+                                {/* Key info cards */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5">
+                                        <p className="text-[10px] font-black uppercase tracking-wider text-gray-400 mb-1">Effectif Total</p>
+                                        <p className="text-2xl font-black text-gray-900 dark:text-white">{selectedClass.eleves_count} Élèves</p>
+                                    </div>
+                                    <div className="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5">
+                                        <p className="text-[10px] font-black uppercase tracking-wider text-gray-400 mb-1">Professeur Principal</p>
+                                        <p className="text-sm font-black text-gray-900 dark:text-white truncate">
+                                            {selectedClass.professeur_principal?.name || 'Non attribué'}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Top Élèves (Tableau d'Honneur sommaire) */}
+                                {selectedClass.eleves && selectedClass.eleves.length > 0 && (
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-amber-500">🏆</span>
+                                            <h4 className="text-xs font-black uppercase tracking-wider text-gray-900 dark:text-white">
+                                                Tableau d'Honneur / Meilleurs Élèves de la classe
+                                            </h4>
+                                        </div>
+                                        <div className="space-y-2">
+                                            {selectedClass.eleves.map((st, i) => (
+                                                <div key={st.id} className="p-3 rounded-xl bg-gray-50 dark:bg-white/5 flex items-center justify-between border border-gray-100 dark:border-white/5">
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 font-black text-xs flex items-center justify-center">
+                                                            {i + 1}
+                                                        </span>
+                                                        <span className="text-xs font-extrabold uppercase text-gray-900 dark:text-white">
+                                                            {st.nom} {st.prenom}
+                                                        </span>
+                                                    </div>
+                                                    {st.moy1 !== null && (
+                                                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">
+                                                            {Number(st.moy1).toFixed(2)}/20
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Matières de la classe (sans coefs) */}
+                                {selectedClass.matieres && selectedClass.matieres.length > 0 && (
+                                    <div className="space-y-3">
+                                        <h4 className="text-xs font-black uppercase tracking-wider text-gray-900 dark:text-white">
+                                            Disciplines &amp; Matières dispensées ({selectedClass.matieres.length})
+                                        </h4>
+                                        <div className="flex flex-wrap gap-2">
+                                            {selectedClass.matieres.map((m) => (
+                                                <span key={m.id} className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase bg-gray-100 dark:bg-white/5 text-gray-800 dark:text-gray-200">
+                                                    {m.nom}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Modal Footer */}
+                            <div className="p-4 sm:p-6 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex items-center justify-between">
+                                <span className="text-xs text-gray-400">Établissement {school.name}</span>
+                                <button
+                                    onClick={() => setSelectedClass(null)}
+                                    className="px-6 py-2.5 rounded-xl bg-gray-900 dark:bg-white dark:text-black text-white font-extrabold text-xs uppercase tracking-wider"
+                                >
+                                    Fermer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* ── SECTION HISTORIQUE DES RÉUSSITES ────────────────────────────── */}
                 {academic_histories && academic_histories.length > 0 && (

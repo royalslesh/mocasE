@@ -132,15 +132,23 @@ Route::middleware(['auth', 'verified', 'school.isolate'])->group(function () {
         Route::get('/discipline/classe/{classe}', [\App\Http\Controllers\DisciplineController::class, 'classe'])->name('discipline.classe');
         Route::post('/discipline', [\App\Http\Controllers\DisciplineController::class, 'store'])->name('discipline.store');
         Route::delete('/discipline/{disciplineRecord}', [\App\Http\Controllers\DisciplineController::class, 'destroy'])->name('discipline.destroy');
+        Route::delete('/discipline/{disciplineRecord}', [\App\Http\Controllers\DisciplineController::class, 'destroy'])->name('discipline.destroy');
+        // Feuille d'Appel Journalière pour le Surveillant Général & la Direction
+        Route::get('/attendance/daily-sheet', [\App\Http\Controllers\TimetableController::class, 'dailySheet'])->name('attendance.daily_sheet');
     });
 
-    
-    // Export / Impression PDF (Proviseur + Censeur)
+    // Export / Impression PDF & Emplois du Temps (Proviseur + Censeur)
     Route::middleware(['role:super_admin,proviseur,censeur'])->group(function () {
         Route::get('/exports', [\App\Http\Controllers\ExportController::class, 'index'])->name('exports.index');
         Route::get('/exports/students', [\App\Http\Controllers\ExportController::class, 'studentList'])->name('exports.students');
         Route::get('/exports/staff', [\App\Http\Controllers\ExportController::class, 'staffList'])->name('exports.staff');
         Route::get('/exports/id-cards', [\App\Http\Controllers\ExportController::class, 'idCards'])->name('exports.id_cards');
+
+        // Gestion des Emplois du Temps par la Direction
+        Route::get('/timetables', [\App\Http\Controllers\TimetableController::class, 'index'])->name('timetables.index');
+        Route::post('/timetables', [\App\Http\Controllers\TimetableController::class, 'store'])->name('timetables.store');
+        Route::delete('/timetables/{timetable}', [\App\Http\Controllers\TimetableController::class, 'destroy'])->name('timetables.destroy');
+        Route::post('/timetables/generate-template', [\App\Http\Controllers\TimetableController::class, 'generateTemplate'])->name('timetables.template');
     });
 Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

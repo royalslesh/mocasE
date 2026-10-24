@@ -17,6 +17,12 @@ class GradeController extends Controller
     public function create(Request $request)
     {
         $user = $request->user()->load('school');
+
+        // Sécurité : Rôles autorisés uniquement
+        if (!in_array($user->role, ['super_admin', 'proviseur', 'censeur', 'enseignant'])) {
+            abort(403, "Accès refusé : vous n'avez pas l'autorisation d'accéder au module des notes.");
+        }
+
         $schoolId = $user->school_id;
 
         // Charger les classes de l'école avec leurs matières (relation pivot matiere_classe) et leurs élèves
@@ -120,9 +126,27 @@ class GradeController extends Controller
         ]);
 
         $user = $request->user();
+        if (!in_array($user->role, ['super_admin', 'proviseur', 'censeur', 'enseignant'])) {
+            abort(403, "Sécurité : Rôle non autorisé à saisir des notes.");
+        }
+
         $classe = Classe::findOrFail($request->classe_id);
         $sequence = (int) $request->sequence;
         $school = $user->school;
+        $schoolId = $school ? $school->id : $user->school_id;
+
+        // Isolation établissement
+        if ($user->role !== 'super_admin' && $classe->school_id !== $schoolId) {
+            return back()->with('error', "Sécurité : Cette classe n'appartient pas à votre établissement.");
+        }
+
+        // Vérification que tous les élèves appartiennent bien à cette classe
+        $validStudentIds = Eleve::where('school_id', $schoolId)->where('classe_id', $classe->id)->pluck('id')->toArray();
+        foreach ($request->notes as $n) {
+            if (!in_array((int) $n['student_id'], $validStudentIds)) {
+                return back()->with('error', "Sécurité : Tentative d'enregistrement de note pour un élève non inscrit dans cette classe.");
+            }
+        }
 
         // 0. Vérification Autorisation Globale Établissement
         if ($school && !$school->is_grades_submission_open && !in_array($user->role, ['super_admin', 'proviseur'])) {
@@ -236,9 +260,27 @@ class GradeController extends Controller
         ]);
 
         $user = $request->user();
+        if (!in_array($user->role, ['super_admin', 'proviseur', 'censeur', 'enseignant'])) {
+            return response()->json(['error' => "Sécurité : Rôle non autorisé."], 403);
+        }
+
         $classe = Classe::findOrFail($validated['classe_id']);
         $sequence = (int) $validated['sequence'];
         $school = $user->school;
+        $schoolId = $school ? $school->id : $user->school_id;
+
+        // Isolation établissement
+        if ($user->role !== 'super_admin' && $classe->school_id !== $schoolId) {
+            return response()->json(['error' => "Sécurité : Classe non autorisée."], 403);
+        }
+
+        $student = Eleve::where('id', $validated['student_id'])
+            ->where('school_id', $schoolId)
+            ->where('classe_id', $classe->id)
+            ->first();
+        if (!$student) {
+            return response()->json(['error' => "Sécurité : Cet élève n'appartient pas à cette classe."], 403);
+        }
 
         // Vérification autorisations
         if ($school && !$school->is_grades_submission_open && !in_array($user->role, ['super_admin', 'proviseur'])) {
@@ -248,6 +290,29 @@ class GradeController extends Controller
         $authField = "seq{$sequence}_auth";
         if (!$classe->$authField && !in_array($user->role, ['super_admin', 'proviseur'])) {
             return response()->json(['error' => "La saisie n'est pas autorisée par le Censeur pour la Séquence {$sequence}."], 403);
+        }
+
+        // Vérification Délais de saisie (Deadlines)
+        $deadline = \App\Models\GradingDeadline::where('school_id', $schoolId)->where('sequence', $sequence)->first();
+        if ($deadline && ($deadline->start_date || $deadline->end_date)) {
+            $now = now();
+            $isOpen = true;
+            if ($deadline->start_date && $now->lt($deadline->start_date)) $isOpen = false;
+            if ($deadline->end_date && $now->gt($deadline->end_date->endOfDay())) $isOpen = false;
+
+            if (!$isOpen && !in_array($user->role, ['super_admin', 'proviseur'])) {
+                $hasExtension = \App\Models\GradeExtensionRequest::where('school_id', $schoolId)
+                    ->where('user_id', $user->id)
+                    ->where('classe_id', $validated['classe_id'])
+                    ->where('subject_id', $validated['matiere_id'])
+                    ->where('sequence', $sequence)
+                    ->where('status', 'approved')
+                    ->exists();
+
+                if (!$hasExtension) {
+                    return response()->json(['error' => "Le délai de saisie pour la Séquence {$sequence} est expiré. Veuillez demander une dérogation."], 403);
+                }
+            }
         }
 
         if ($user->role === 'enseignant') {

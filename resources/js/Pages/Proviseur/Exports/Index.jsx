@@ -1,11 +1,15 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
 
 export default function Index({ auth, classes = [], userRole }) {
     const [selectedClasse, setSelectedClasse] = useState('');
     const [selectedFiltre, setSelectedFiltre] = useState('tous');
     const [selectedClasseCards, setSelectedClasseCards] = useState('');
+
+    // Feuille d'appel journalière
+    const [selectedDailyClasse, setSelectedDailyClasse] = useState(classes[0]?.id || '');
+    const [selectedDailyDate, setSelectedDailyDate] = useState(new Date().toISOString().split('T')[0]);
 
     const handlePrintStudents = () => {
         const params = new URLSearchParams();
@@ -24,6 +28,18 @@ export default function Index({ auth, classes = [], userRole }) {
         window.open(`${route('exports.id_cards')}?${params.toString()}`, '_blank');
     };
 
+    const handlePrintDailyAttendance = () => {
+        if (!selectedDailyClasse) {
+            alert('Veuillez sélectionner une classe pour la feuille d\'appel.');
+            return;
+        }
+        const params = new URLSearchParams({
+            classe_id: selectedDailyClasse,
+            date: selectedDailyDate || new Date().toISOString().split('T')[0],
+        });
+        window.open(`${route('attendance.daily_sheet')}?${params.toString()}`, '_blank');
+    };
+
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -31,19 +47,29 @@ export default function Index({ auth, classes = [], userRole }) {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <p className="text-[10px] font-black uppercase tracking-[0.2em] mb-1" style={{ color: 'var(--primary-color)' }}>
-                            Documents Officiels
+                            Documents Officiels &amp; Vie Scolaire
                         </p>
-                        <h2 className="font-extrabold text-3xl text-gray-900 dark:text-white leading-tight tracking-tight">
-                            Centre d'Exports & Impressions PDF
+                        <h2 className="font-extrabold text-2xl sm:text-3xl text-gray-900 dark:text-white leading-tight tracking-tight">
+                            Centre d'Exports &amp; Impressions PDF
                         </h2>
                     </div>
+
+                    {['super_admin', 'proviseur', 'censeur'].includes(userRole) && (
+                        <Link
+                            href={route('timetables.index')}
+                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white dark:bg-white/10 text-gray-800 dark:text-white font-extrabold text-xs uppercase tracking-wider border border-gray-200 dark:border-white/10 shadow-sm hover:border-[var(--primary-color)] transition-all"
+                        >
+                            <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            Gérer les Emplois du Temps
+                        </Link>
+                    )}
                 </div>
             }
         >
             <Head title="Exports & Listes Officielles" />
 
-            <div className="py-12 bg-transparent min-h-screen">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
+            <div className="py-8 sm:py-12 bg-transparent min-h-screen">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
                     {/* Notice informatif */}
                     <div className="p-6 bg-white dark:bg-[var(--dark-bg)] rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm flex items-center gap-4">
@@ -54,17 +80,77 @@ export default function Index({ auth, classes = [], userRole }) {
                             <p className="text-sm font-bold text-gray-900 dark:text-white">
                                 {userRole === 'censeur' 
                                     ? 'Espace Censeur : Vos exports sont automatiquement restreints aux classes et aux enseignants de votre niveau de responsabilité.'
-                                    : 'Espace Proviseur : Vous avez un accès complet à l\'ensemble des classes, élèves et membres du personnel de l\'établissement.'}
+                                    : 'Espace Proviseur & Surveillance : Accès complet aux listes officielles, feuilles d\'appel quotidiennes et documents de contrôle.'}
                             </p>
                             <p className="text-xs text-gray-400 mt-0.5">
-                                Chaque document généré respecte les normes officielles avec en-tête, logo de l'établissement et zones d'émargement et signature.
+                                Chaque document généré respecte les normes officielles MINESEC avec en-tête d'État, logo de l'établissement et signatures réglementaires.
                             </p>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-                        {/* Carte 1 : Export Élèves */}
+                        {/* Carte 1 : FEUILLE D'APPEL JOURNALIÈRE (Nouveauté demandée) */}
+                        <div className="bg-white dark:bg-[var(--dark-bg)] rounded-[2.5rem] border-2 border-emerald-500/30 shadow-xl p-8 flex flex-col justify-between relative overflow-hidden">
+                            <div className="space-y-6">
+                                <div className="flex items-center gap-4 pb-6 border-b border-gray-100 dark:border-white/5">
+                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-emerald-500 text-white shadow-lg shadow-emerald-500/30">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                                    </div>
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Feuille d'Appel Journalière</h3>
+                                            <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-[9px] font-black uppercase">Vie Scolaire</span>
+                                        </div>
+                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-0.5">Pour le Surveillant Général &amp; Professeurs</p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Classe à contrôler *</label>
+                                        <select
+                                            value={selectedDailyClasse}
+                                            onChange={(e) => setSelectedDailyClasse(e.target.value)}
+                                            className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-3.5 text-sm font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 transition-all"
+                                        >
+                                            {classes.map((cls) => (
+                                                <option key={cls.id} value={cls.id} className="dark:bg-[#111614]">
+                                                    {cls.nom} {cls.section ? `(${cls.section.toUpperCase()})` : ''} — {cls.eleves_count || 0} élève(s)
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Date du contrôle d'appel *</label>
+                                        <input
+                                            type="date"
+                                            value={selectedDailyDate}
+                                            onChange={(e) => setSelectedDailyDate(e.target.value)}
+                                            className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-3.5 text-sm font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 transition-all"
+                                        />
+                                    </div>
+
+                                    <div className="bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl p-4 border border-emerald-500/20 text-xs text-gray-600 dark:text-gray-300 space-y-1">
+                                        <p className="font-black text-emerald-800 dark:text-emerald-300 uppercase">Fonctionnement en temps réel :</p>
+                                        <p>• Génère automatiquement les colonnes horaires du jour selon l'emploi du temps de la classe.</p>
+                                        <p>• Affiche le nom de la matière et du professeur pour chaque heure.</p>
+                                        <p>• Cases pour cocher Présent (P) / Absent (A) / Retard (R) par élève.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={handlePrintDailyAttendance}
+                                className="mt-8 w-full py-4 text-xs font-black uppercase tracking-widest text-white rounded-2xl shadow-xl transition-all hover:opacity-90 active:scale-95 inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                                Imprimer la Feuille d'Appel (A4 Paysage)
+                            </button>
+                        </div>
+
+                        {/* Carte 2 : Export Liste des Élèves */}
                         <div className="bg-white dark:bg-[var(--dark-bg)] rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-xl p-8 flex flex-col justify-between">
                             <div className="space-y-6">
                                 <div className="flex items-center gap-4 pb-6 border-b border-gray-100 dark:border-white/5">
@@ -72,8 +158,8 @@ export default function Index({ auth, classes = [], userRole }) {
                                         <svg className="w-6 h-6" style={{ color: 'var(--primary-color)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Liste des Élèves</h3>
-                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-0.5">Listes d'appel & Registre officiel</p>
+                                        <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Liste Nominative des Élèves</h3>
+                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-0.5">Registre officiel d'inscriptions</p>
                                     </div>
                                 </div>
 
@@ -83,7 +169,7 @@ export default function Index({ auth, classes = [], userRole }) {
                                         <select
                                             value={selectedClasse}
                                             onChange={(e) => setSelectedClasse(e.target.value)}
-                                            className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-[var(--primary-color)] transition-all"
+                                            className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-3.5 text-sm font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-[var(--primary-color)] transition-all"
                                         >
                                             <option value="" className="dark:bg-[#111614]">Toutes les classes disponibles</option>
                                             {classes.map((cls) => (
@@ -106,7 +192,7 @@ export default function Index({ auth, classes = [], userRole }) {
                                                     key={opt.id}
                                                     type="button"
                                                     onClick={() => setSelectedFiltre(opt.id)}
-                                                    className={`py-3 px-2 rounded-xl text-xs font-black uppercase tracking-wider border transition-all text-center ${
+                                                    className={`py-2.5 px-2 rounded-xl text-xs font-black uppercase tracking-wider border transition-all text-center ${
                                                         selectedFiltre === opt.id
                                                             ? 'text-white border-transparent shadow-md'
                                                             : 'bg-gray-50 dark:bg-white/5 text-gray-500 border-gray-100 dark:border-white/5 hover:bg-gray-100 dark:hover:bg-white/10'
@@ -120,10 +206,10 @@ export default function Index({ auth, classes = [], userRole }) {
                                     </div>
 
                                     <div className="bg-gray-50 dark:bg-white/5 rounded-2xl p-4 border border-gray-100 dark:border-white/5 text-xs text-gray-500 dark:text-gray-400 space-y-1">
-                                        <p className="font-bold text-gray-900 dark:text-white">Inclus dans ce document :</p>
-                                        <p>• Numérotation, Matricule, Nom & Prénom, Sexe</p>
-                                        <p>• Badge Redoublant / Nouveau et colonne d'émargement</p>
-                                        <p>• Espaces officiels de visa Censeur et Proviseur</p>
+                                        <p className="font-bold text-gray-900 dark:text-white">Colonnes officielles incluses :</p>
+                                        <p>• N°, Nom &amp; Prénom, Sexe, Matricule, Date &amp; Lieu de Naissance</p>
+                                        <p>• Statut de l'élève (Nouveau ou Redoublant)</p>
+                                        <p>• Signature officielle du Proviseur</p>
                                     </div>
                                 </div>
                             </div>
@@ -134,11 +220,11 @@ export default function Index({ auth, classes = [], userRole }) {
                                 style={{ backgroundColor: 'var(--primary-color)' }}
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
-                                Générer la Liste des Élèves (PDF)
+                                Générer la Liste Nominative (PDF)
                             </button>
                         </div>
 
-                        {/* Carte 2 : Export Personnel */}
+                        {/* Carte 3 : Export Personnel */}
                         <div className="bg-white dark:bg-[var(--dark-bg)] rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-xl p-8 flex flex-col justify-between">
                             <div className="space-y-6">
                                 <div className="flex items-center gap-4 pb-6 border-b border-gray-100 dark:border-white/5">
@@ -147,27 +233,26 @@ export default function Index({ auth, classes = [], userRole }) {
                                     </div>
                                     <div>
                                         <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Liste du Personnel</h3>
-                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-0.5">Corps enseignant & Encadrement</p>
+                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-0.5">Corps enseignant &amp; Encadrement</p>
                                     </div>
                                 </div>
 
                                 <div className="space-y-5">
-                                    <div className="bg-gray-50 dark:bg-white/5 rounded-2xl p-5 border border-gray-100 dark:border-white/5 space-y-3">
+                                    <div className="bg-gray-50 dark:bg-white/5 rounded-2xl p-4 border border-gray-100 dark:border-white/5 space-y-2">
                                         <p className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">
                                             {userRole === 'censeur' ? 'Périmètre Censeur :' : 'Périmètre Proviseur :'}
                                         </p>
                                         <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
                                             {userRole === 'censeur'
-                                                ? 'La liste contient uniquement les enseignants assignés aux classes sous votre supervision directe, avec leurs matières enseignées.'
-                                                : 'La liste regroupe l\'ensemble des effectifs par catégorie : Censeurs, Enseignants (avec matières et classes), Surveillants Généraux et Comptables.'}
+                                                ? 'La liste contient uniquement les enseignants assignés aux classes sous votre supervision directe.'
+                                                : 'La liste regroupe l\'ensemble des effectifs par catégorie : Censeurs, Enseignants, Surveillants et Administration.'}
                                         </p>
                                     </div>
 
                                     <div className="bg-gray-50 dark:bg-white/5 rounded-2xl p-4 border border-gray-100 dark:border-white/5 text-xs text-gray-500 dark:text-gray-400 space-y-1">
                                         <p className="font-bold text-gray-900 dark:text-white">Inclus dans ce document :</p>
-                                        <p>• Répartition par corps de métier (Censeurs, Profs, Surveillants...)</p>
-                                        <p>• Matières attribuées à chaque enseignant</p>
-                                        <p>• Logo officiel et signatures administratives</p>
+                                        <p>• Corps de métier et matières assignées</p>
+                                        <p>• En-tête officiel et signatures réglementaires</p>
                                     </div>
                                 </div>
                             </div>
@@ -182,7 +267,7 @@ export default function Index({ auth, classes = [], userRole }) {
                             </button>
                         </div>
 
-                        {/* Carte 3 : Cartes d'Identité Scolaires (Badges) */}
+                        {/* Carte 4 : Cartes d'Identité Scolaires (Badges) */}
                         <div className="bg-white dark:bg-[var(--dark-bg)] rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-xl p-8 flex flex-col justify-between">
                             <div className="space-y-6">
                                 <div className="flex items-center gap-4 pb-6 border-b border-gray-100 dark:border-white/5">
@@ -201,7 +286,7 @@ export default function Index({ auth, classes = [], userRole }) {
                                         <select
                                             value={selectedClasseCards}
                                             onChange={(e) => setSelectedClasseCards(e.target.value)}
-                                            className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 transition-all"
+                                            className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-3.5 text-sm font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 transition-all"
                                         >
                                             <option value="" className="dark:bg-[#111614]">Toutes les classes de l'école</option>
                                             {classes.map((cls) => (

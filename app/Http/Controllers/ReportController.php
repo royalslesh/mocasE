@@ -287,6 +287,11 @@ class ReportController extends Controller
         $user    = $request->user();
         $school  = $user->school;
 
+        // Sécurité : Isolation stricte par établissement
+        if ($user->role !== 'super_admin' && $school && $student->school_id !== $school->id) {
+            abort(403, "Sécurité : Cet élève n'appartient pas à votre établissement.");
+        }
+
         $isPublished = $school ? $school->is_report_cards_visible : true;
         $isMgmt      = in_array($user->role, ['super_admin', 'proviseur', 'censeur']);
 

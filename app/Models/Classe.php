@@ -75,4 +75,8 @@ class Classe extends Model
     {
         return $this->hasMany(Bulletin::class);
     }
+    public function timetables()
+    {
+        return $this->hasMany(Timetable::class)->orderBy('order');
+    }
 }

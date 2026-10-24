@@ -41,10 +41,20 @@ class VisitorController extends Controller
         $levels = Level::whereHas('classes', function ($query) use ($school) {
             $query->where('school_id', $school->id);
         })->with([
-                    'classes' => function ($query) use ($school) {
-                        $query->where('school_id', $school->id)->withCount('eleves');
-                    }
-                ])->get();
+            'classes' => function ($query) use ($school) {
+                $query->where('school_id', $school->id)
+                    ->withCount('eleves')
+                    ->with([
+                        'professeurPrincipal:id,name,email',
+                        'matieres:id,nom,groupe',
+                        'eleves' => function ($q) {
+                            $q->select('id', 'classe_id', 'nom', 'prenom', 'sexe', 'moy1')
+                              ->orderByDesc('moy1')
+                              ->take(3);
+                        }
+                    ]);
+            }
+        ])->get();
 
         // Calcul du taux de réussite global (Moyenne >= 10 sur moy1)
         $totalEleves = Eleve::where('school_id', $school->id)->count();
